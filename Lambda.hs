@@ -23,39 +23,49 @@ data Formals = Formals [String]
 data Expression = Number Integer
                 | Operator Char [Expression]
                 | Symbol String
-                | Lambda Formals Expression [Expression]
+                | Lambda Formals Expression
                 | Expression
                   deriving (Show)
+
+data LambdaApply = LambdaApply String [Expression]
+  deriving (Show)
 
 data Definition = Definition String Expression
   deriving (Show)
 
-data Form = FDef Definition | FExpr Expression
+data Form = FDef Definition | FExpr Expression | FLApply LambdaApply
   deriving (Show)
 
 type Value = Integer
 
-data Environment = Environment (Map.Map String Value)
+data Environment = Environment (Map.Map String Expression)
   deriving (Show)
+
+envLookup :: String -> Environment -> Expression
+envLookup symbol (Environment env) =
+  case res of
+    Just res -> res
+    Nothing -> undefined
+  where res = Map.lookup symbol env
 
 eval :: Form -> Environment -> (Environment, Maybe Value)
 eval form env =
   case form of
     FDef def -> (evalDefinition def env, Nothing)
     FExpr expr -> (env, Just $ evalExpr env expr)
+    FLApply (LambdaApply symbol exprs) -> (env, Just $ evalApply env
+                                                (envLookup symbol env)
+                                                exprs)
 
 evalDefinition :: Definition -> Environment -> Environment
 evalDefinition (Definition symbol expr) (Environment env) =
-  Environment (Map.insert symbol (evalExpr (Environment env) expr) env)
+  Environment (Map.insert symbol expr env)
 
 evalExpr :: Environment -> Expression -> Value
 
-evalExpr env (Lambda formals expr exprs) =
-  apply env (Lambda formals expr exprs)
-
 evalExpr (Environment env) (Symbol s) =
   case res of
-    Just res -> res
+    Just res -> (evalExpr (Environment env) res)
     Nothing -> 0
   where res = Map.lookup s env
 
@@ -64,12 +74,17 @@ evalExpr env e =
     Number n -> n
     Operator '+' exps -> foldl (+) 0 (map (evalExpr env) exps)
     Operator '*' exps -> foldl (*) 1 (map (evalExpr env) exps)
+    Lambda formals expression -> 0 -- not sure about this return value
 
 -- Potrei implementare (let ...)
 -- per fare esperimenti con lo scope locale
 
 
 -- Apply
+
+evalApply env (Lambda formals expr) exprs =
+  apply env (Lambda formals expr) exprs
+
 -- Come rappresentare una procedura? E` una espressione
 -- "A procedure is, slightly simplified, an abstraction of an expression over objects."
 -- Come rappresentare gli argomenti? E` una lista di simboli che devono
@@ -79,18 +94,19 @@ evalExpr env e =
 -- This is slightly (!) wrong
 data Arguments = Arguments [Expression]
 
-apply :: Environment -> Expression -> Value
-
 -- Valuta tutti gli arguments e li associa ai formals in un nuovo ambiente
 -- Poi valuta expr in quell'ambiente
 
 -- (Lambda (Formals ["a","b"]) (Operator '+' [Symbol "a",Number 2]))
 
-apply env (Lambda (Formals formals) expr arguments) =
+apply :: Environment -> Expression -> [Expression] -> Value
+
+-- FIXME manca la consultazione dell'ambiente globale
+apply env (Lambda (Formals formals) expr) arguments =
   evalExpr env' expr
-  where env' = Environment (Map.fromList $ zip (formals) (map (evalExpr env) arguments)) 
+  where env' = Environment (Map.fromList $ zip formals arguments) 
   
-apply _ _ = undefined
+apply _ _ _ = undefined
 
 
 main :: IO ()
@@ -111,8 +127,8 @@ main = runInputT defaultSettings (loop env)
                    Right form -> do
                      let (env', result) = eval form env
                      case result of
-                       Just result -> outputStrLn $ printf "%d\n" result
-                       Nothing     -> outputStrLn $ printf ""
+                       Just result -> outputStrLn $ printf "%d\n%s\n" result (show env')
+                       Nothing     -> outputStrLn $ printf "%s\n" (show env')
                      loop env'
 
 -- Parser
@@ -160,18 +176,12 @@ pLambda = do
   void $ whitespace
   void $ char '('
   void $ whitespace
-  void $ char '('
-  void $ whitespace
   void $ string "lambda"
   void $ whitespace
   formals <- pFormals
   expr <- pExpression
   void $ char ')'
-  void $ whitespace
-  exprs <- many $ pExpression
-  void $ char ')'
-  void $ whitespace
-  return $ (Lambda formals expr exprs)
+  return $ (Lambda formals expr)
   
 
 pIdentifier :: Parser String
@@ -201,10 +211,22 @@ pDefinition = do
   void $ char ')'
   return $ FDef (Definition name expr)
 
+pLambdaApply :: Parser Form
+pLambdaApply = do
+  void $ whitespace
+  void $ char '('
+  expr <- pIdentifier
+  void $ whitespace
+  exprs <- many1 pExpression
+  void $ whitespace
+  void $ char ')'
+  return $ FLApply (LambdaApply expr exprs)
+  
 pForm :: Parser Form
 pForm =
   try (pDefinition) 
   <|> try (pExpr)
+  <|> try (pLambdaApply)
 
 -- pList :: Parser Expression
 -- pList = do 
