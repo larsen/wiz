@@ -6,17 +6,10 @@ import Text.Parsec.Combinator (choice, many1, manyTill)
 import Control.Applicative (many)
 import Control.Monad (void)
 import qualified Data.Map as Map
+import qualified Data.List as L
 import Text.Printf
 import Debug.Trace
 
--- *Main> let expr = Operator '+' [Number 1, Number 2, Number 3]
--- *Main> expr
--- Operator '+' [Number 1,Number 2,Number 3]
--- *Main> eval expr
--- 6
--- *Main> 
-
--- Eval
 
 data Formals = Formals [String]
   deriving (Show)
@@ -28,23 +21,36 @@ data Expression = Number Integer
                 | Lambda Formals Expression
                 | LambdaApply String [Expression]
                 | Expression
-                  deriving (Show)
 
--- data LambdaApply = LambdaApply String [Expression]
---   deriving (Show)
+instance Show Expression where
+  show (Number n) = show n
+  show (Symbol s) = show s
+  show (Operator c exprs) =
+    "(" ++ show c ++ " " ++ L.unwords (map show exprs) ++ ")"
+  show (If test consequent alternate) =
+    "(if " ++ show test ++ show consequent ++ show alternate ++ ")"
+  show (Lambda (Formals formals) expr) =
+    "(λ ( " ++ (L.unwords (map show formals)) ++ show expr ++ ")"
+  show (LambdaApply s exprs) = "( " ++ show s ++ " " ++ (L.unwords (map show exprs)) ++ " )"
 
 data Definition = Definition String Expression
   deriving (Show)
 
-data Form = FDef Definition | FExpr Expression -- | FLApply LambdaApply
+data Form = FDef Definition | FExpr Expression
   deriving (Show)
 
 type Value = Integer
 
 data Environment = Environment (Map.Map String Expression)
-  deriving (Show)
 
--- Bisogna correggere la generazione dell'environment prima della valutazione
+instance Show Environment where
+  show (Environment env) =
+    L.unlines (map showPair (Map.toList env)) ++ "\n"
+    where showPair (k, v) = show k ++ "\t->\t" ++ show v
+
+-- This is slightly (!) wrong
+data Arguments = Arguments [Expression]
+
 envLookup :: String -> Environment -> Expression
 envLookup symbol env
   | trace ("envlookup " ++ show symbol ++ " in " ++ show env) False = undefined
@@ -64,7 +70,6 @@ evalDefinition :: Definition -> Environment -> Environment
 evalDefinition (Definition symbol expr) (Environment env) =
   Environment (Map.insert symbol expr env)
 
-
 -- FIXME ugly
 evalInBooleanContext :: Integer -> Bool
 evalInBooleanContext n | trace ("evalInBooleanContext " ++ show n) False = undefined
@@ -72,17 +77,13 @@ evalInBooleanContext 0 = False
 evalInBooleanContext _ = True
 
 evalExpr :: Environment -> Expression -> Value
-evalExpr env expr
-  | trace ("evalExpr " ++ show expr ++ " in " ++ show env) False = undefined
-evalExpr (Environment env) (Symbol s) =
-  case res of
-    Just res -> (evalExpr (Environment env) res)
-    Nothing -> 0
-  where res = Map.lookup s env
-        
+-- evalExpr env expr
+--   | trace ("evalExpr " ++ show expr ++ " in " ++ show env) False = undefined
+
 evalExpr env e =
   case e of
     Number n -> n
+    Symbol s -> evalExpr env (envLookup s env)
     Operator '+' exps -> foldl (+) 0 (map (evalExpr env) exps)
     Operator '*' exps -> foldl (*) 1 (map (evalExpr env) exps)
     Operator '-' (expr:exps) -> foldl (-)
@@ -93,35 +94,34 @@ evalExpr env e =
         (evalExpr env consequent)
       else (evalExpr env alternate)
     Lambda formals expression -> 0 -- not sure about this return value
-    LambdaApply symbol exprs -> evalApply env (envLookup symbol env) exprs
+    LambdaApply symbol exprs -> apply env (envLookup symbol env) exprs
 
 -- Apply
 
 -- "A procedure is, slightly simplified,
 -- an abstraction of an expression over objects."
 
-evalApply env (Lambda formals expr) exprs =
-  apply env (Lambda formals expr) exprs
-
--- This is slightly (!) wrong
-data Arguments = Arguments [Expression]
-
-extendEnvironment :: Environment -> [(String, Expression)] -> Environment
-extendEnvironment (Environment env) newElems =
-  Environment (foldl (\map (k, v) -> Map.insert k v map) env newElems)
-
 apply :: Environment -> Expression -> [Expression] -> Value
+apply env _ _ | trace ("apply in " ++ show env) False = undefined
 apply env (Lambda (Formals formals) expr) arguments =
   evalExpr env' expr
-  where env' = extendEnvironment env
-               (zip formals (map (evalExpr env) arguments))  
+  where env' = extendEnvironment env (zip formals arguments)
+        -- FIXME non sto valutando le espressioni!
+        extendEnvironment (Environment env) newElems =
+          Environment (Map.union env (Map.fromList newElems))
 apply _ _ _ = undefined
 
 
 main :: IO ()
 main = runInputT defaultSettings (loop env)
    where
-       env = Environment (Map.fromList [])
+       env = Environment (Map.fromList
+                          [("fact",Lambda (Formals ["n"])
+                                   (If (Symbol "n")
+                                    (Operator '*'
+                                     [Symbol "n",
+                                      LambdaApply "fact" [Operator '-' [Symbol "n",Number 1]]])
+                                    (Number 1)))])
        loop :: Environment -> InputT IO ()
        loop env = do
            input <- getInputLine "λ> "
