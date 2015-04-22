@@ -105,10 +105,13 @@ apply :: Environment -> Expression -> [Expression] -> Value
 apply env _ _ | trace ("apply in " ++ show env) False = undefined
 apply env (Lambda (Formals formals) expr) arguments =
   evalExpr env' expr
-  where env' = extendEnvironment env (zip formals arguments)
+  where env' = extendEnvironment env (zip formals evaledArguments)
         -- FIXME non sto valutando le espressioni!
+        -- Forse una buona idea e` eliminare il tipo Value,
+        -- e fare si` che eval restituisca solo Expression piu` semplici
         extendEnvironment (Environment env) newElems =
           Environment (Map.union env (Map.fromList newElems))
+        evaledArguments = map Number $ map (evalExpr env) arguments
 apply _ _ _ = undefined
 
 
