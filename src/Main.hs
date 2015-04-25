@@ -3,15 +3,14 @@ module Main where
 import Wiz.Types
 import Wiz.Parser
 import Wiz.EvalApply
+
 import Text.Parsec (parse)
 import Text.Printf
 import System.Console.Haskeline
 import qualified Data.Map as Map
 
-main :: IO ()
-main = runInputT defaultSettings (loop env)
-   where
-       env = Environment (Map.fromList
+initialEnv :: Environment
+initialEnv =  Environment (Map.fromList
                           -- A couple of functions for tests
                           [("fact",Lambda (Formals ["n"])
                                    (If (Symbol "n")
@@ -20,7 +19,12 @@ main = runInputT defaultSettings (loop env)
                                       LambdaApply "fact" [Operator '-' [Symbol "n",Number 1]]])
                                     (Number 1))),
                            ("sqr",Lambda (Formals ["n"])
-                                  (Operator '*' [Symbol "n", Symbol "n"]))])
+                                  (Operator '*' [Symbol "n", Symbol "n"]))]) 
+
+main :: IO ()
+main = runInputT defaultSettings (loop env)
+   where
+       env = initialEnv
        loop :: Environment -> InputT IO ()
        loop env = do
            input <- getInputLine "λ> "
@@ -35,7 +39,6 @@ main = runInputT defaultSettings (loop env)
                    Right form -> do
                      let (env', result) = eval form env
                      case result of
-                       -- Just result -> outputStrLn $ printf "%s\n%s\n" (show result) (show env')
                        Just result -> outputStrLn $ printf "%s\n" (show result)
-                       Nothing     -> outputStrLn $ printf "\n" -- (show env')
+                       Nothing     -> outputStrLn $ printf "\n"
                      loop env'
