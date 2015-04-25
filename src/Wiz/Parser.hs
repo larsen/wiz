@@ -25,12 +25,8 @@ pNumber = do
 
 pOperator :: Parser Expression
 pOperator = do
-  void $ whitespace
-  void $ char '('
   o <- choice [char '+', char '*', char '-']
-  exprs <- many $ pExpression
-  void $ char ')'
-  return $ Operator o exprs
+  return $ Operator o
 
 -- Il problema e` nelle seguenti due definizioni
 pExpression :: Parser Expression
@@ -40,9 +36,8 @@ pExpression =
   <|> try (pSymbol)
   <|> try (pQuote)
   <|> try (pIf)
-  <|> try (pList)
   <|> try (pLambda)
-  <|> try (pLambdaApply)
+  <|> try (pList)
 
 pExpr :: Parser Form
 pExpr = do
@@ -94,23 +89,6 @@ pLambda = do
   expr <- pExpression
   void $ char ')'
   return $ (Lambda formals expr)
-
--- pLambdaApply :: Parser Expression
--- pLambdaApply = do
---   void $ whitespace
---   void $ char '('
---   symbol <- pIdentifier
---   void $ whitespace
---   exprs <- many1 pExpression
---   void $ whitespace
---   void $ char ')'
---   return $ LambdaApply symbol exprs
-
-pLambdaApply = do
-  symbol <- pIdentifier
-  void $ whitespace
-  exprs <- many1 pExpression
-  return $ LambdaApply symbol exprs
 
 pIdentifier :: Parser String
 pIdentifier = do

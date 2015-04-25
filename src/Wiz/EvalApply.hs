@@ -42,24 +42,27 @@ evalNumeric ((Number x):xs) = x : evalNumeric xs
 
 evalNumericElem :: Expression -> Integer
 evalNumericElem (Number n) = n
-evalNumericElem _ = undefined
+evalNumericElem e = error $ "evalNumericElem " ++ show e
 
 evalExpr :: Environment -> Expression -> Expression
-evalExpr env expr
-  | trace ("evalExpr " ++ show expr ++ " in\n" ++ show env) False = undefined
+-- evalExpr env expr
+--   | trace ("evalExpr " ++ show expr ++ " in\n" ++ show env) False = undefined
 evalExpr env expression =
   case expression of
     Number n -> Number n
     Symbol s -> evalExpr env (envLookup s env)
     
-    Operator '*' exprs -> Number (foldl (*) 1 (evalNumeric (map (evalExpr env) exprs)))
-    Operator '+' exprs -> Number (foldl (+) 0 (evalNumeric (map (evalExpr env) exprs)))
-    Operator '-' (exp:exps) ->
-      Number (foldl (-)
-              (evalNumericElem $ evalExpr env exp)
-              (evalNumeric (map (evalExpr env) exps)))
+    List exprs@(car:cdr) ->
+      case car of
+        Operator '*' -> Number (foldl (*) 1 (evalNumeric (map (evalExpr env) cdr)))
+        Operator '+' -> Number (foldl (+) 0 (evalNumeric (map (evalExpr env) cdr)))
+        Operator '-' ->
+          Number (foldl (-)
+                  (evalNumericElem $ evalExpr env (head cdr))
+                  (evalNumeric (map (evalExpr env) (tail cdr))))
+        Symbol symbol -> apply env (envLookup symbol env) cdr
+        _ -> List (map (evalExpr env) exprs)
 
-    List exprs -> List (map (evalExpr env) exprs)
     Quote expr -> expr
     If test consequent alternate ->
       (if (evalInBooleanContext $ evalExpr env test) then
@@ -67,7 +70,6 @@ evalExpr env expression =
        else (evalExpr env alternate))
 
     Lambda formals expression -> Number 0 -- not sure about this return value
-    LambdaApply symbol exprs -> apply env (envLookup symbol env) exprs
 
 
 -- Apply

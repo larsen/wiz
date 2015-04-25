@@ -14,12 +14,14 @@ initialEnv =  Environment (Map.fromList
                           -- A couple of functions for tests
                           [("fact",Lambda (Formals ["n"])
                                    (If (Symbol "n")
-                                    (Operator '*'
-                                     [Symbol "n",
-                                      LambdaApply "fact" [Operator '-' [Symbol "n",Number 1]]])
+                                    (List [Operator '*',
+                                           Symbol "n",
+                                           (List [Symbol "fact",
+                                                  (List [Operator '-', Symbol "n", Number 1])])
+                                     ])
                                     (Number 1))),
                            ("sqr",Lambda (Formals ["n"])
-                                  (Operator '*' [Symbol "n", Symbol "n"]))]) 
+                                  (List [Operator '*', Symbol "n", Symbol "n"]))]) 
 
 main :: IO ()
 main = runInputT defaultSettings (loop env)
