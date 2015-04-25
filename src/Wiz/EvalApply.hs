@@ -44,6 +44,17 @@ evalNumericElem :: Expression -> Integer
 evalNumericElem (Number n) = n
 evalNumericElem e = error $ "evalNumericElem " ++ show e
 
+car :: Expression -> Expression
+car (List l) = head l
+car _ = error "car applied to non list expression!"
+
+cdr :: Expression -> Expression
+cdr (List l) = List (tail l)
+cdr _ = error "car applied to non list expression!"
+
+cons :: Expression -> Expression -> Expression
+cons x y = List [x, y]
+
 evalExpr :: Environment -> Expression -> Expression
 -- evalExpr env expr
 --   | trace ("evalExpr " ++ show expr ++ " in\n" ++ show env) False = undefined
@@ -52,15 +63,21 @@ evalExpr env expression =
     Number n -> Number n
     Symbol s -> evalExpr env (envLookup s env)
     
-    List exprs@(car:cdr) ->
-      case car of
-        Operator '*' -> Number (foldl (*) 1 (evalNumeric (map (evalExpr env) cdr)))
-        Operator '+' -> Number (foldl (+) 0 (evalNumeric (map (evalExpr env) cdr)))
+    List exprs@(x:xs) ->
+      case x of
+        Operator '*' -> Number (foldl (*) 1 (evalNumeric (map (evalExpr env) xs)))
+        Operator '+' -> Number (foldl (+) 0 (evalNumeric (map (evalExpr env) xs)))
         Operator '-' ->
           Number (foldl (-)
-                  (evalNumericElem $ evalExpr env (head cdr))
-                  (evalNumeric (map (evalExpr env) (tail cdr))))
-        Symbol symbol -> apply env (envLookup symbol env) cdr
+                  (evalNumericElem $ evalExpr env (head xs))
+                  (evalNumeric (map (evalExpr env) (tail xs))))
+        Symbol symbol ->
+          case symbol of
+            -- Primitive procedures
+            "car" -> car (head xs)
+            "cdr" -> cdr (head xs)
+            "cons" -> cons (head xs) (head (tail xs))
+            _ -> apply env (envLookup symbol env) xs
         _ -> List (map (evalExpr env) exprs)
 
     Quote expr -> expr
@@ -82,7 +99,6 @@ apply :: Environment -> Expression -> [Expression] -> Expression
 apply env (Lambda (Formals formals) expr) arguments =
   evalExpr env' expr
   where env' = extendEnvironment env (zip formals evaledArguments)
-        -- FIXME non sto valutando le espressioni!
         extendEnvironment (Environment env) newElems =
           Environment (Map.union (Map.fromList newElems) env)
         evaledArguments = map (evalExpr env) arguments
