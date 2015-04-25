@@ -1,6 +1,6 @@
 module Wiz.Types (
     Formals( Formals ),
-    Expression( Number, Operator, Symbol, If, Lambda, LambdaApply, List ),
+    Expression( Number, Operator, Symbol, Quote, If, Lambda, LambdaApply, List ),
     Definition( Definition ),
     Form (FDef, FExpr),
     Environment( Environment )
@@ -15,6 +15,7 @@ data Formals = Formals [String]
 data Expression = Number Integer
                 | Operator Char [Expression]
                 | Symbol String
+                | Quote Expression
                 | If Expression Expression Expression
                 | Lambda Formals Expression
                 | LambdaApply String [Expression]
@@ -26,6 +27,7 @@ data Expression = Number Integer
 instance Show Expression where
   show (Number n) = show n
   show (Symbol s) = show s
+  show (Quote e) = show e
   show (List exprs) = "( " ++ L.unwords (map show exprs) ++ " )"
   show (Operator c exprs) =
     "( " ++ show c ++ " " ++ L.unwords (map show exprs) ++ " )"

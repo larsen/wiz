@@ -38,6 +38,7 @@ pExpression =
   try (pNumber)
   <|> try (pOperator)
   <|> try (pSymbol)
+  <|> try (pQuote)
   <|> try (pIf)
   <|> try (pList)
   <|> try (pLambda)
@@ -114,16 +115,23 @@ pLambdaApply = do
 pIdentifier :: Parser String
 pIdentifier = do
   void $ whitespace
-  name <- many1 (noneOf " ()\n\t")
+  name <- many1 (noneOf " '()\n\t")
   void $ whitespace
   return name
 
 pSymbol :: Parser Expression
 pSymbol = do
   void $ whitespace
-  name <- many1 (noneOf " -+()\n\t")
+  name <- many1 (noneOf " '-+()\n\t")
   void $ whitespace
   return $ Symbol name
+
+pQuote :: Parser Expression
+pQuote = do
+  void $ whitespace
+  void $ char '\''
+  expr <- pExpression
+  return $ (Quote expr)
 
 pDefinition :: Parser Form
 pDefinition = do

@@ -8,10 +8,11 @@ import qualified Data.List as L
 import Text.Printf
 import Debug.Trace
 
-
 envLookup :: String -> Environment -> Expression
 -- envLookup symbol env
 --   | trace ("envlookup " ++ show symbol ++ " in\n" ++ show env) False = undefined
+
+-- FIXME dovrebbe restituire un errore
 envLookup symbol (Environment env) =
   case res of
     Just res -> res
@@ -44,8 +45,8 @@ evalNumericElem (Number n) = n
 evalNumericElem _ = undefined
 
 evalExpr :: Environment -> Expression -> Expression
--- evalExpr env expr
---   | trace ("evalExpr " ++ show expr ++ " in\n" ++ show env) False = undefined
+evalExpr env expr
+  | trace ("evalExpr " ++ show expr ++ " in\n" ++ show env) False = undefined
 evalExpr env expression =
   case expression of
     Number n -> Number n
@@ -59,6 +60,7 @@ evalExpr env expression =
               (evalNumeric (map (evalExpr env) exps)))
 
     List exprs -> List (map (evalExpr env) exprs)
+    Quote expr -> expr
     If test consequent alternate ->
       (if (evalInBooleanContext $ evalExpr env test) then
          (evalExpr env consequent)
