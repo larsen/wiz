@@ -123,18 +123,10 @@ pDefinition = do
   expr <- pExpression
   void $ char ')'
   return $ FDef (Definition name expr)
-
   
 pForm :: Parser Form
 pForm =
   try (pDefinition) 
   <|> try (pExpr)
-
--- pList :: Parser Expression
--- pList = do 
---     void $ char '('
---     ts <- many $ pExpression
---     void $ char ')'
---     return ts
 
 test rule text = parse rule "(source)" text
