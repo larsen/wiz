@@ -10,7 +10,7 @@ import qualified Data.List as L
 import qualified Data.Map as Map
 
 data Formals = Formals [String]
-  deriving (Show)
+  deriving (Eq, Show)
 
 data Expression = Number Integer
                 | Operator Char
@@ -19,6 +19,7 @@ data Expression = Number Integer
                 | If Expression Expression Expression
                 | Lambda Formals Expression
                 | List [Expression]
+                  deriving (Eq)
 
 -- TODO ora mi piacerebbe implementare
 -- car e cdr
@@ -41,6 +42,7 @@ data Form = FDef Definition | FExpr Expression
   deriving (Show)
 
 data Environment = Environment (Map.Map String Expression)
+                   deriving (Eq)
 
 instance Show Environment where
   show (Environment env) =
