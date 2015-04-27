@@ -74,7 +74,7 @@ pList = do
   void $ whitespace
   void $ char '('
   void $ whitespace
-  exprs <- many1 pExpression
+  exprs <- many pExpression
   void $ char ')'
   return $ (List exprs)
 
