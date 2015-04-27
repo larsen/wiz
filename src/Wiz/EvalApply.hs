@@ -12,11 +12,10 @@ envLookup :: String -> Environment -> Expression
 -- envLookup symbol env
 --   | trace ("envlookup " ++ show symbol ++ " in\n" ++ show env) False = undefined
 
--- FIXME dovrebbe restituire un errore
 envLookup symbol (Environment env) =
   case res of
     Just res -> res
-    Nothing -> undefined
+    Nothing -> error ("Unbound symbol " ++ show symbol)
   where res = Map.lookup symbol env
 
 eval :: Form -> Environment -> (Environment, Maybe Expression)
