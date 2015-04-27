@@ -41,6 +41,6 @@ main = runInputT defaultSettings (loop env)
                    Right form -> do
                      let (env', result) = eval form env
                      case result of
-                       Just result -> outputStrLn $ printf "%s\n" (show result)
+                       Just result -> outputStrLn $ printf "%s" (show result)
                        Nothing     -> outputStrLn $ printf "\n"
                      loop env'
