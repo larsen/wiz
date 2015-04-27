@@ -1,6 +1,6 @@
 module Wiz.Types (
     Formals( Formals ),
-    Expression( Number, Operator, Symbol, Quote, If, Lambda, List ),
+    Expression( Number, Boolean, Operator, Symbol, Quote, If, Lambda, List ),
     Definition( Definition ),
     Form (FDef, FExpr),
     Environment( Environment )
@@ -13,6 +13,7 @@ data Formals = Formals [String]
   deriving (Eq, Show)
 
 data Expression = Number Integer
+                | Boolean Bool
                 | Operator Char
                 | Symbol String
                 | Quote Expression
@@ -21,19 +22,17 @@ data Expression = Number Integer
                 | List [Expression]
                   deriving (Eq)
 
--- TODO ora mi piacerebbe implementare
--- car e cdr
-
 instance Show Expression where
   show (Number n) = show n
+  show (Boolean b) = if b then "#t" else "#f"
   show (Symbol s) = show s
   show (Quote e) = show e
-  show (List exprs) = "( " ++ L.unwords (map show exprs) ++ " )"
+  show (List exprs) = "(" ++ L.unwords (map show exprs) ++ ")"
   show (Operator c) = show c
   show (If test consequent alternate) =
     "(if " ++ show test ++ " " ++ show consequent ++ " " ++ show alternate ++ ")"
   show (Lambda (Formals formals) expr) =
-    "(λ ( " ++ (L.unwords (map show formals)) ++ " ) ( " ++ show expr ++ " ) )"
+    "(λ (" ++ (L.unwords (map show formals)) ++ ") (" ++ show expr ++ "))"
 
 data Definition = Definition String Expression
   deriving (Show)

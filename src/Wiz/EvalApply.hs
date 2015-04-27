@@ -28,31 +28,46 @@ evalDefinition :: Definition -> Environment -> Environment
 evalDefinition (Definition symbol expr) (Environment env) =
   Environment (Map.insert symbol expr env)
 
--- FIXME ugly
-evalInBooleanContext :: Expression -> Bool
--- evalInBooleanContext n | trace ("evalInBooleanContext " ++ show n) False = undefined
-evalInBooleanContext (Number 0) = False
-evalInBooleanContext _ = True
+evalNum :: Expression -> Integer
+evalNum (Number n) = n
+evalNum e = error $ "evalNum " ++ show e
 
-evalNumeric :: [Expression] -> [Integer]
--- evalNumeric n | trace ("evalNumeric " ++ show n) False = undefined
-evalNumeric [] = []
-evalNumeric ((Number x):xs) = x : evalNumeric xs
+evalBool :: Expression -> Bool
+evalBool (Boolean b) = b
+evalBool e = error $ "evalBool " ++ show e
 
-evalNumericElem :: Expression -> Integer
-evalNumericElem (Number n) = n
-evalNumericElem e = error $ "evalNumericElem " ++ show e
+equal :: Expression -> Expression -> Expression
+equal x y | x == y = Boolean True
+          | otherwise = Boolean False
 
 car :: Expression -> Expression
-car (List l) = head l
+car (List (x:_)) = x
+car (List []) = List []
 car _ = error "car applied to non list expression!"
 
 cdr :: Expression -> Expression
-cdr (List l) = List (tail l)
+cdr (List (_:xs)) = List xs
+cdr (List []) = List []
 cdr _ = error "car applied to non list expression!"
 
-cons :: Expression -> Expression -> Expression
-cons x y = List [x, y]
+cons :: Environment -> Expression -> Expression -> Expression
+cons env x (List []) = List [evalExpr env x]
+cons env x y = List [evalExpr env x, evalExpr env y]
+
+nil :: Expression -> Expression
+nil (List []) = Boolean True
+nil _ = Boolean False
+
+not :: Expression -> Expression
+not (Boolean False) = Boolean True
+not _ = Boolean False
+
+or :: [Expression] -> Expression
+or = Boolean . Prelude.or . map evalBool
+
+pair :: Expression -> Expression
+pair (List (x:_)) = Boolean True
+pair _ = Boolean False
 
 evalExpr :: Environment -> Expression -> Expression
 -- evalExpr env expr
@@ -60,32 +75,40 @@ evalExpr :: Environment -> Expression -> Expression
 evalExpr env expression =
   case expression of
     Number n -> Number n
+    Boolean b -> Boolean b
     Symbol s -> evalExpr env (envLookup s env)
     
+    List [] -> expression
     List exprs@(x:xs) ->
       case x of
-        Operator '*' -> Number (foldl (*) 1 (evalNumeric (map (evalExpr env) xs)))
-        Operator '+' -> Number (foldl (+) 0 (evalNumeric (map (evalExpr env) xs)))
+        Operator '*' -> Number (foldl (*) 1 ((map (evalNum . evalExpr env) xs)))
+        Operator '+' -> Number (foldl (+) 0 ((map (evalNum . evalExpr env) xs)))
         Operator '-' ->
           Number (foldl (-)
-                  (evalNumericElem $ evalExpr env (head xs))
-                  (evalNumeric (map (evalExpr env) (tail xs))))
+                  (evalNum $ evalExpr env (head xs))
+                  ((map (evalNum . evalExpr env) (tail xs))))
         Symbol symbol ->
           case symbol of
             -- Primitive procedures
-            "car" -> car (head xs)
-            "cdr" -> cdr (head xs)
-            "cons" -> cons (head xs) (head (tail xs))
+            "=" -> equal (evalExpr env (head xs))
+                         (evalExpr env (head (tail xs)))
+            "or" -> Wiz.EvalApply.or (map (evalExpr env) xs)
+            "not" -> Wiz.EvalApply.not (evalExpr env (head xs))
+            "nil?" -> nil (evalExpr env (head xs))
+            "pair?" -> pair (evalExpr env (head xs))
+            "car" -> car (evalExpr env (head xs))
+            "cdr" -> cdr (evalExpr env (head xs))
+            "cons" -> cons env (head xs) (head (tail xs))
             _ -> apply env (envLookup symbol env) xs
         _ -> List (map (evalExpr env) exprs)
 
     Quote expr -> expr
     If test consequent alternate ->
-      (if (evalInBooleanContext $ evalExpr env test) then
+      (if (evalBool $ evalExpr env test) then
          (evalExpr env consequent)
        else (evalExpr env alternate))
 
-    Lambda formals expression -> Number 0 -- not sure about this return value
+    Lambda formals body -> expression -- returns itself
 
 
 -- Apply

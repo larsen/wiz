@@ -16,6 +16,17 @@ import Control.Monad (void)
 whitespace :: Parser ()
 whitespace = void $ many $ oneOf " \n\t"
 
+pBoolean :: Parser Expression
+pBoolean = do
+  void $ whitespace
+  (try $ do
+    string "#t"
+    return (Boolean True))
+  <|>
+  (try $ do
+    string "#f"
+    return (Boolean False))
+
 pNumber :: Parser Expression
 pNumber = do
   void $ whitespace
@@ -32,6 +43,7 @@ pOperator = do
 pExpression :: Parser Expression
 pExpression =
   try (pNumber)
+  <|> try (pBoolean)
   <|> try (pOperator)
   <|> try (pSymbol)
   <|> try (pQuote)
