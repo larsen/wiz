@@ -1,5 +1,6 @@
 module Wiz.Parser (
-    pForm
+    pForm,
+    pProgram
   ) where
 
 import Wiz.Types
@@ -140,5 +141,10 @@ pForm :: Parser Form
 pForm =
   try (pDefinition) 
   <|> try (pExpr)
+
+pProgram :: Parser Program
+pProgram = do
+  forms <- many pForm
+  return $ Program forms
 
 test rule text = parse rule "(source)" text

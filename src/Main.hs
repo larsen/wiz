@@ -9,37 +9,31 @@ import Text.Printf
 import System.Console.Haskeline
 import qualified Data.Map as Map
 
-initialEnv :: Environment
-initialEnv =  Environment (Map.fromList
-                          -- A couple of functions for tests
-                          [("fact",Lambda (Formals ["n"])
-                                   (If (List [Symbol "=", Symbol "n", Number 0])
-                                    (Number 1)
-                                    (List [Operator '*',
-                                           Symbol "n",
-                                           (List [Symbol "fact",
-                                                  (List [Operator '-', Symbol "n", Number 1])])
-                                     ]))),
-                           ("map", Lambda (Formals ["f","lst"])
-                                   (If (List [Symbol "nil?",Symbol "lst"])
-                                    (Quote (List []))
-                                    (List [Symbol "cons",
-                                           List [Symbol "f",List [Symbol "car",Symbol "lst"]],
-                                           List [Symbol "map",Symbol "f",List [Symbol "cdr",Symbol "lst"]]]))),
-                           ("else", (Boolean True)),
-                           ("cond", Lambda (Formals ["lst"])
-                                    (If (List [Symbol "nil?",Symbol "lst"])
-                                     (Quote (List []))
-                                     (If (List [Symbol "car",Symbol "lst"])
-                                      (List [Symbol "car",List [Symbol "cdr",Symbol "lst"]])
-                                      (List [Symbol "cond",List [Symbol "cdr",Symbol "lst"]])))),
-                           ("sqr",Lambda (Formals ["n"])
-                                  (List [Operator '*', Symbol "n", Symbol "n"]))]) 
+emptyEnv :: Environment
+emptyEnv = Environment (Map.fromList [])
+
+loadProgram :: String -> IO Environment
+loadProgram file = do
+  program <- readFile file
+  let res = parse pProgram "(source)" program
+  case res of
+    Left err -> do
+      return $ emptyEnv
+    Right p -> do
+      return $ runProgram emptyEnv p
+  where
+    runProgram env (Program (x:xs)) =
+      let (env', res) = eval x env
+      in case res of
+        Just res -> runProgram env' (Program xs)
+        Nothing  -> runProgram env' (Program xs) -- ???
+    runProgram env (Program []) = env
 
 main :: IO ()
-main = runInputT defaultSettings (loop env)
+main = do
+   env <- loadProgram "init.scm"
+   runInputT defaultSettings (loop env)
    where
-       env = initialEnv
        loop :: Environment -> InputT IO ()
        loop env = do
            input <- getInputLine "λ> "

@@ -3,6 +3,7 @@ module Wiz.Types (
     Expression( Number, Boolean, Operator, Symbol, Quote, If, Lambda, List ),
     Definition( Definition ),
     Form (FDef, FExpr),
+    Program (Program),
     Environment( Environment )
   ) where
 
@@ -42,6 +43,8 @@ data Form = FDef Definition | FExpr Expression
 
 data Environment = Environment (Map.Map String Expression)
                    deriving (Eq)
+
+data Program = Program [Form]
 
 instance Show Environment where
   show (Environment env) =
