@@ -118,8 +118,8 @@ evalExpr env expression =
 
 apply :: Environment -> Expression -> [Expression] -> Expression
 -- apply env _ _ | trace ("apply in\n" ++ show env) False = undefined
-apply env (Lambda (Formals formals) expr) arguments =
-  evalExpr env' expr
+apply env (Lambda (Formals formals) body) arguments =
+  evalExpr env' body
   where env' = extendEnvironment env (zip formals evaledArguments)
         extendEnvironment (Environment env) newElems =
           Environment (Map.union (Map.fromList newElems) env)
