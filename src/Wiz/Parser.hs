@@ -47,6 +47,7 @@ pExpression =
   <|> try (pBoolean)
   <|> try (pOperator)
   <|> try (pSymbol)
+  <|> try (pDefinition)
   <|> try (pQuote)
   <|> try (pIf)
   <|> try (pLambda)
@@ -124,7 +125,7 @@ pQuote = do
   expr <- pExpression
   return $ (Quote expr)
 
-pDefinition :: Parser Form
+pDefinition :: Parser Expression
 pDefinition = do
   void $ whitespace
   void $ char '('
@@ -135,12 +136,10 @@ pDefinition = do
   void $ whitespace
   expr <- pExpression
   void $ char ')'
-  return $ FDef (Definition name expr)
+  return $ (Definition name expr)
   
 pForm :: Parser Form
-pForm =
-  try (pDefinition) 
-  <|> try (pExpr)
+pForm = try (pExpr)
 
 pProgram :: Parser Program
 pProgram = do

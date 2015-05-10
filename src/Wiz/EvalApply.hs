@@ -19,12 +19,10 @@ envLookup symbol (Environment env) =
   where res = Map.lookup symbol env
 
 eval :: Form -> Environment -> (Environment, Maybe Expression)
-eval form env =
-  case form of
-    FDef def -> (evalDefinition def env, Nothing)
-    FExpr expr -> (env, Just $ evalExpr env expr)
+eval (FExpr (Definition sym expr)) env = (evalDefinition (Definition sym expr) env, Nothing)
+eval (FExpr expr) env = (env, Just $ evalExpr env expr)
 
-evalDefinition :: Definition -> Environment -> Environment
+evalDefinition :: Expression -> Environment -> Environment
 evalDefinition (Definition symbol expr) (Environment env) =
   Environment (Map.insert symbol expr env)
 

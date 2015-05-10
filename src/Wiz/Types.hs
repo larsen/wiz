@@ -1,8 +1,7 @@
 module Wiz.Types (
     Formals( Formals ),
-    Expression( Number, Boolean, Operator, Symbol, Quote, If, Lambda, List ),
-    Definition( Definition ),
-    Form (FDef, FExpr),
+    Expression( Number, Boolean, Operator, Symbol, Quote, If, Definition, Lambda, List ),
+    Form (FExpr),
     Program (Program),
     Environment( Environment )
   ) where
@@ -19,6 +18,7 @@ data Expression = Number Integer
                 | Symbol String
                 | Quote Expression
                 | If Expression Expression Expression
+                | Definition String Expression
                 | Lambda Formals Expression
                 | List [Expression]
                   deriving (Eq)
@@ -32,13 +32,15 @@ instance Show Expression where
   show (Operator c) = show c
   show (If test consequent alternate) =
     "(if " ++ show test ++ " " ++ show consequent ++ " " ++ show alternate ++ ")"
+  show (Definition sym expr) =
+    "(define " ++ sym ++ " (" ++ show expr ++ "))"
   show (Lambda (Formals formals) expr) =
     "(λ (" ++ (L.unwords (map show formals)) ++ ") (" ++ show expr ++ "))"
 
-data Definition = Definition String Expression
-  deriving (Show)
+-- data Definition = Definition String Expression
+--   deriving (Show)
 
-data Form = FDef Definition | FExpr Expression
+data Form = FExpr Expression
   deriving (Show)
 
 data Environment = Environment (Map.Map String Expression)
