@@ -20,3 +20,9 @@
         (if (car lst)
             (car (cdr lst))
             (cond (cdr lst))))))
+
+(define length
+  (lambda (lst)
+    (if (nil? lst)
+        0
+        (+ 1 (length (cdr lst))))))
