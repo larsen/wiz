@@ -29,7 +29,7 @@ spec =
       expr <- parseForm "(+ 2 2)"
       W.eval expr env `shouldBe` (env, Just (Number 4))
 
-    it "eval function calls /squqre" $ do
+    it "eval function calls /square" $ do
       env <- loadProgram "test/square.scm"
       expr <- parseForm "(square 10)"
       W.eval expr env `shouldBe` (env, Just (Number 100))
