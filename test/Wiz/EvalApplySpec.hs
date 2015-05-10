@@ -9,7 +9,6 @@ import Text.Parsec (parse)
 import qualified Data.Map as Map
 
 
--- parseForm :: String -> IO Form
 parseForm str = do
   let res = (parse pForm "(source)" str)
   case res of
