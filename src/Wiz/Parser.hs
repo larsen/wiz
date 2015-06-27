@@ -29,20 +29,20 @@ closedParens = do
 
 pBoolean :: Parser Expression
 pBoolean = do
-  void $ whitespace
-  (try $ do
+  void whitespace
+  try (do
     string "#t"
     return (Boolean True))
   <|>
-  (try $ do
+  try (do
     string "#f"
     return (Boolean False))
 
 pNumber :: Parser Expression
 pNumber = do
-  void $ whitespace
-  n <- many1 $ digit
-  void $ whitespace
+  void whitespace
+  n <- many1 digit
+  void whitespace
   return $ Number (read n)
 
 pOperator :: Parser Expression
@@ -53,15 +53,15 @@ pOperator = do
 -- Il problema e` nelle seguenti due definizioni
 pExpression :: Parser Expression
 pExpression =
-  try (pNumber)
-  <|> try (pBoolean)
-  <|> try (pOperator)
-  <|> try (pSymbol)
-  <|> try (pDefinition)
-  <|> try (pQuote)
-  <|> try (pIf)
-  <|> try (pLambda)
-  <|> try (pList)
+  try pNumber
+  <|> try pBoolean
+  <|> try pOperator
+  <|> try pSymbol
+  <|> try pDefinition
+  <|> try pQuote
+  <|> try pIf
+  <|> try pLambda
+  <|> try pList
 
 pExpr :: Parser Form
 pExpr = do
@@ -80,11 +80,11 @@ pIf :: Parser Expression
 pIf = do
   openParens
   void $ string "if"
-  void $ whitespace
+  void whitespace
   test <- pExpression
-  void $ whitespace
+  void whitespace
   consequent <- pExpression
-  void $ whitespace
+  void whitespace
   alternate <- pExpression
   closedParens
   return $ If test consequent alternate
@@ -100,7 +100,7 @@ pLambda :: Parser Expression
 pLambda = do
   openParens
   void $ string "lambda"
-  void $ whitespace
+  void whitespace
   formals <- pFormals
   expr <- pExpression
   closedParens

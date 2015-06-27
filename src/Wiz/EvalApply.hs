@@ -5,6 +5,7 @@ module Wiz.EvalApply (
 import Wiz.Types
 import qualified Data.Map as Map
 import qualified Data.List as L
+import Data.Maybe
 import Text.Printf
 import Debug.Trace
 
@@ -79,12 +80,12 @@ evalExpr env expression =
     List [] -> expression
     List exprs@(x:xs) ->
       case x of
-        Operator '*' -> Number (foldl (*) 1 ((map (evalNum . evalExpr env) xs)))
-        Operator '+' -> Number (foldl (+) 0 ((map (evalNum . evalExpr env) xs)))
+        Operator '*' -> Number (product (map (evalNum . evalExpr env) xs))
+        Operator '+' -> Number (sum (map (evalNum . evalExpr env) xs))
         Operator '-' ->
           Number (foldl (-)
                   (evalNum $ evalExpr env (head xs))
-                  ((map (evalNum . evalExpr env) (tail xs))))
+                  (map (evalNum . evalExpr env) (tail xs)))
         Symbol symbol ->
           case symbol of
             -- Primitive procedures
