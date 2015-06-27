@@ -17,6 +17,16 @@ import Control.Monad (void)
 whitespace :: Parser ()
 whitespace = void $ many $ oneOf " \n\t"
 
+openParens = do
+  void whitespace
+  void $ char '('
+  void whitespace
+
+closedParens = do
+  void whitespace
+  void $ char ')'
+  void whitespace
+
 pBoolean :: Parser Expression
 pBoolean = do
   void $ whitespace
@@ -60,19 +70,15 @@ pExpr = do
 
 pFormals :: Parser Formals
 pFormals = do
-  void $ whitespace
-  void $ char '('
+  openParens
   formals <- many pIdentifier
-  void $ char ')'
-  void $ whitespace
-  return $ (Formals formals)
+  closedParens
+  return $ Formals formals
   where formals = []
 
 pIf :: Parser Expression
 pIf = do
-  void $ whitespace
-  void $ char '('
-  void $ whitespace
+  openParens
   void $ string "if"
   void $ whitespace
   test <- pExpression
@@ -80,29 +86,25 @@ pIf = do
   consequent <- pExpression
   void $ whitespace
   alternate <- pExpression
-  void $ char ')'
-  return $ (If test consequent alternate)
+  closedParens
+  return $ If test consequent alternate
 
 pList :: Parser Expression
 pList = do
-  void $ whitespace
-  void $ char '('
-  void $ whitespace
+  openParens
   exprs <- many pExpression
-  void $ char ')'
-  return $ (List exprs)
+  closedParens
+  return $ List exprs
 
 pLambda :: Parser Expression
 pLambda = do
-  void $ whitespace
-  void $ char '('
-  void $ whitespace
+  openParens
   void $ string "lambda"
   void $ whitespace
   formals <- pFormals
   expr <- pExpression
-  void $ char ')'
-  return $ (Lambda formals expr)
+  closedParens
+  return $ Lambda WU.emptyEnv formals expr
 
 pIdentifier :: Parser String
 pIdentifier = do
@@ -127,16 +129,14 @@ pQuote = do
 
 pDefinition :: Parser Expression
 pDefinition = do
-  void $ whitespace
-  void $ char '('
-  void $ whitespace
+  openParens
   void $ string "define"
   void $ whitespace
   name <- pIdentifier
   void $ whitespace
   expr <- pExpression
-  void $ char ')'
-  return $ (Definition name expr)
+  closedParens
+  return $ Definition name expr
   
 pForm :: Parser Form
 pForm = try (pExpr)
