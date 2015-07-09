@@ -8,15 +8,59 @@ import Test.Hspec
 import Text.Parsec (parse)
 import qualified Data.Map as Map
 
+import Text.ParserCombinators.Parsec.Error (
+  ParseError,
+  Message,
+  errorMessages,
+  messageEq )
+
+instance Eq ParseError where
+   a == b = errorMessages a == errorMessages b
 
 parseForm str = do
-  let res = (parse pForm "(source)" str)
+  let res = parse pForm "(source)" str
   case res of
     Left err -> error "Something gone wrong!"
     Right f  -> return f
 
-spec =
+spec = describe "main" $ do
   
+  describe "parse" $ do
+    it "parses form /1 (number)" $
+      parse pForm "(test)" "1" `shouldBe` Right (FExpr (Number 1))
+  
+    it "parses form /2" $
+      parse pForm "(test)" "(1 2)" `shouldBe`
+        Right (FExpr (List [Number 1, Number 2]))
+
+    it "parses form /3" $
+      parse pForm "(test)" "(let ((a 10)) a)" `shouldBe`
+        Right (FExpr (List
+                      [Symbol "let",
+                       List [List [Symbol "a", Number 10]], Symbol "a"]))
+
+    it "parses form /3" $
+      parse pForm "(test)" "(let ((a 10) (b 20)) a)" `shouldBe`
+        Right (FExpr (List
+                      [Symbol "let",
+                       List [List [Symbol "a", Number 10],
+                             List [Symbol "b", Number 20]], Symbol "a"]))
+
+
+  describe "environment" $ do
+    
+    it "can create new empty environments" $
+      emptyEnv `shouldBe` Environment Nothing (Frame (Map.fromList []))
+
+    it "can extend environments with new mappings /1" $
+      W.extendEnvironment emptyEnv [("a", Number 10)] `shouldBe`
+        Environment Nothing (Frame $ Map.fromList [("a", Number 10)])
+
+    it "can extend environments with new mappings /2" $
+      W.extendEnvironment emptyEnv [("a", Number 10)] `shouldBe`
+        Environment Nothing (Frame $ Map.fromList [("a", Number 10)])
+
+
   describe "eval" $ do
 
     it "eval numeric expressions as integers" $ do
