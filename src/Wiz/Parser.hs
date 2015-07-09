@@ -146,4 +146,24 @@ pProgram = do
   forms <- many pForm
   return $ Program forms
 
-test rule text = parse rule "(source)" text
+test rule = parse rule "(source)"
+
+loadProgram :: String -> IO Environment
+loadProgram file = do
+  program <- readFile file
+  putStrLn $ "Loading '" ++ file ++ "'"
+  let res = parse pProgram "(source)" program
+  case res of
+    Left err -> do
+      putStrLn "Error occurred parsing file."
+      return WU.emptyEnv
+    Right p -> do
+      putStrLn "Init file parsed correctly."
+      return $ runProgram WU.emptyEnv p
+  where
+    runProgram env (Program (x:xs)) =
+      let (env', res) = eval x env
+      in case res of
+        Just res -> runProgram env' (Program xs)
+        Nothing  -> runProgram env' (Program xs) -- ???
+    runProgram env (Program []) = env
