@@ -108,38 +108,38 @@ pLambda = do
 
 pIdentifier :: Parser String
 pIdentifier = do
-  void $ whitespace
+  void whitespace
   name <- many1 (noneOf " '()\n\t")
-  void $ whitespace
+  void whitespace
   return name
 
 pSymbol :: Parser Expression
 pSymbol = do
-  void $ whitespace
+  void whitespace
   name <- many1 (noneOf " '-+()\n\t")
-  void $ whitespace
+  void whitespace
   return $ Symbol name
 
 pQuote :: Parser Expression
 pQuote = do
-  void $ whitespace
+  void whitespace
   void $ char '\''
   expr <- pExpression
-  return $ (Quote expr)
+  return $ Quote expr
 
 pDefinition :: Parser Expression
 pDefinition = do
   openParens
   void $ string "define"
-  void $ whitespace
+  void whitespace
   name <- pIdentifier
-  void $ whitespace
+  void whitespace
   expr <- pExpression
   closedParens
   return $ Definition name expr
   
 pForm :: Parser Form
-pForm = try (pExpr)
+pForm = try pExpr
 
 pProgram :: Parser Program
 pProgram = do
