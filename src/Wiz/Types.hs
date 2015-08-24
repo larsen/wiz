@@ -41,7 +41,7 @@ instance Show Expression where
 --   deriving (Show)
 
 data Form = FExpr Expression
-  deriving (Show)
+  deriving (Eq, Show)
 
 data Environment = Environment (Map.Map String Expression)
                    deriving (Eq)

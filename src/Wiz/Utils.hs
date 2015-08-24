@@ -1,12 +1,10 @@
 module Wiz.Utils (
-  loadProgram
+  emptyEnv
 ) where
 
 import Wiz.Types
 import Wiz.EvalApply
-import Wiz.Parser
 
-import Text.Parsec (parse)
 import qualified Data.Map as Map
 
 emptyEnv :: Environment
