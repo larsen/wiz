@@ -1,9 +1,12 @@
 module Wiz.Parser (
     pForm,
-    pProgram
+    pProgram,
+    loadProgram
   ) where
 
 import Wiz.Types
+import Wiz.EvalApply
+import qualified Wiz.Utils as WU
 import Text.Parsec (ParseError)
 import Text.Parsec.String (Parser)
 import Text.Parsec.Token (parens)
@@ -104,7 +107,7 @@ pLambda = do
   formals <- pFormals
   expr <- pExpression
   closedParens
-  return $ Lambda WU.emptyEnv formals expr
+  return $ Lambda formals expr
 
 pIdentifier :: Parser String
 pIdentifier = do

@@ -47,20 +47,6 @@ spec = describe "main" $ do
                              List [Symbol "b", Number 20]], Symbol "a"]))
 
 
-  describe "environment" $ do
-    
-    it "can create new empty environments" $
-      emptyEnv `shouldBe` Environment Nothing (Frame (Map.fromList []))
-
-    it "can extend environments with new mappings /1" $
-      W.extendEnvironment emptyEnv [("a", Number 10)] `shouldBe`
-        Environment Nothing (Frame $ Map.fromList [("a", Number 10)])
-
-    it "can extend environments with new mappings /2" $
-      W.extendEnvironment emptyEnv [("a", Number 10)] `shouldBe`
-        Environment Nothing (Frame $ Map.fromList [("a", Number 10)])
-
-
   describe "eval" $ do
 
     it "eval numeric expressions as integers" $ do
