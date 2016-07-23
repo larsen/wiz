@@ -149,7 +149,7 @@ pProgram = do
   forms <- many pForm
   return $ Program forms
 
-test rule = parse rule "(source)"
+-- test rule = parse rule "(source)"
 
 loadProgram :: String -> IO Environment
 loadProgram file = do
