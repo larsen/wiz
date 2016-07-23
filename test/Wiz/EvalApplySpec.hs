@@ -14,9 +14,6 @@ import Text.ParserCombinators.Parsec.Error (
   errorMessages,
   messageEq )
 
-instance Eq ParseError where
-   a == b = errorMessages a == errorMessages b
-
 parseForm str = do
   let res = parse pForm "(source)" str
   case res of
