@@ -87,6 +87,7 @@ evalExpr env expression =
             "car" -> car (evalExpr env (head xs))
             "cdr" -> cdr (evalExpr env (head xs))
             "cons" -> cons env (head xs) (head (tail xs))
+            "let" -> evalLet env (head xs) (last xs) 
             _ -> apply env (envLookup symbol env) xs
         _ -> List (map (evalExpr env) exprs)
 
@@ -98,6 +99,17 @@ evalExpr env expression =
 
     Lambda formals body -> expression -- returns itself
 
+symbolToString :: Expression -> String
+symbolToString (Symbol s) = s
+
+listToList (List l) = l
+
+evalLet env (List bindings) body = evalExpr env' body
+  where
+    env' = encloseEnvironment env (extendEnvironment emptyEnv
+                                    (zip bindingsNames bindingsExpressions))
+    bindingsNames = map (symbolToString . head) $ map listToList bindings
+    bindingsExpressions = map last $ map listToList bindings
 
 -- Apply
 
