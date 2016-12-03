@@ -1,5 +1,6 @@
 module Wiz.Environment (
   envLookup,
+  extendEnvironment,
   Environment( Environment )
 ) where
 
@@ -15,6 +16,11 @@ instance Show Environment where
     L.unlines (map showPair (Map.toList env)) ++ "\n"
     where showPair (k, v) = show k ++ "\t->\t" ++ show v
 
+type Binding = (String, Expression)
+
+extendEnvironment :: Environment -> [Binding] -> Environment
+extendEnvironment (Environment env) bindings =
+  Environment (Map.union (Map.fromList bindings) env)
 
 envLookup :: String -> Environment -> Expression
 -- envLookup symbol env

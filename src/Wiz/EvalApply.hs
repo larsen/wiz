@@ -111,7 +111,5 @@ apply :: Environment -> Expression -> [Expression] -> Expression
 apply env (Lambda (Formals formals) body) arguments =
   evalExpr env' body
   where env' = extendEnvironment env (zip formals evaledArguments)
-        extendEnvironment (Environment env) newElems =
-          Environment (Map.union (Map.fromList newElems) env)
         evaledArguments = map (evalExpr env) arguments
 apply _ _ _ = undefined
