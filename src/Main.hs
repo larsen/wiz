@@ -4,7 +4,6 @@ import Wiz.Types
 import Wiz.Environment
 import Wiz.Parser
 import Wiz.EvalApply
-import Wiz.Utils
 
 import Text.Parsec (parse)
 import Text.Printf
