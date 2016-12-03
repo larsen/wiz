@@ -2,6 +2,7 @@ module Wiz.Environment (
   emptyEnv,
   envLookup,
   extendEnvironment,
+  encloseEnvironment,
   Environment( Environment )
 ) where
 
@@ -23,6 +24,9 @@ type Binding = (String, Expression)
 emptyEnv :: Environment
 emptyEnv = Environment (Map.fromList []) Nothing
 
+encloseEnvironment :: Environment -> Environment -> Environment
+encloseEnvironment parentEnv childEnv = Environment (env childEnv) (Just parentEnv)
+
 extendEnvironment :: Environment -> [Binding] -> Environment
 extendEnvironment (Environment env parent) bindings =
   Environment (Map.union (Map.fromList bindings) env) parent
@@ -34,5 +38,7 @@ envLookup :: String -> Environment -> Expression
 envLookup symbol (Environment env parent) =
   case res of
     Just res -> res
-    Nothing -> error ("Unbound symbol " ++ show symbol)
+    Nothing -> case parent of
+      Just p -> envLookup symbol p
+      Nothing -> error ("Unbound symbol " ++ show symbol)
   where res = Map.lookup symbol env

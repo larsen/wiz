@@ -19,3 +19,11 @@ spec = describe "Environment tests" $ do
       (envLookup "a" env) `shouldBe` (Number 10)
     it "Unbound symbol" $ do
       evaluate (envLookup "b" env) `shouldThrow` errorCall "Unbound symbol \"b\""
+
+  describe "Enclosed frames" $ do
+    let env = encloseEnvironment (extendEnvironment emptyEnv [("a", Number 10)]) -- parent
+              (extendEnvironment emptyEnv [("b", Number 20)]) -- child
+    it "Lookup in parent environment /1" $ do
+      (envLookup "a" env) `shouldBe` (Number 10)
+    it "Lookup in parent environment /2" $ do
+      (envLookup "b" env) `shouldBe` (Number 20)
