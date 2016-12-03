@@ -42,6 +42,5 @@ instance Show Expression where
 data Form = FExpr Expression
   deriving (Eq, Show)
 
-
 data Program = Program [Form]
 
