@@ -7,7 +7,6 @@ module Wiz.Parser (
 import Wiz.Types
 import Wiz.Environment
 import Wiz.EvalApply
-import qualified Wiz.Utils as WU
 import Text.Parsec (ParseError)
 import Text.Parsec.String (Parser)
 import Text.Parsec.Token (parens)
@@ -160,10 +159,10 @@ loadProgram file = do
   case res of
     Left err -> do
       putStrLn "Error occurred parsing file."
-      return WU.emptyEnv
+      return emptyEnv
     Right p -> do
       putStrLn "Init file parsed correctly."
-      return $ runProgram WU.emptyEnv p
+      return $ runProgram emptyEnv p
   where
     runProgram env (Program (x:xs)) =
       let (env', res) = eval x env

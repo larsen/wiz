@@ -2,7 +2,6 @@ module Wiz.EvalApplySpec where
 
 import qualified Wiz.EvalApply as W
 import Wiz.Types
-import Wiz.Utils
 import Wiz.Parser
 import Test.Hspec
 import Text.Parsec (parse)

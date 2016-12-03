@@ -1,4 +1,5 @@
 module Wiz.Environment (
+  emptyEnv,
   envLookup,
   extendEnvironment,
   Environment( Environment )
@@ -18,6 +19,9 @@ instance Show Environment where
     where showPair (k, v) = show k ++ "\t->\t" ++ show v
 
 type Binding = (String, Expression)
+
+emptyEnv :: Environment
+emptyEnv = Environment (Map.fromList []) Nothing
 
 extendEnvironment :: Environment -> [Binding] -> Environment
 extendEnvironment (Environment env parent) bindings =
