@@ -3,7 +3,6 @@ module Wiz.Types (
     Expression( Number, Boolean, Operator, Symbol, Quote, If, Definition, Lambda, List ),
     Form (FExpr),
     Program (Program),
-    Environment( Environment )
   ) where
 
 import qualified Data.List as L
@@ -43,12 +42,6 @@ instance Show Expression where
 data Form = FExpr Expression
   deriving (Eq, Show)
 
-data Environment = Environment (Map.Map String Expression)
-                   deriving (Eq)
 
 data Program = Program [Form]
 
-instance Show Environment where
-  show (Environment env) =
-    L.unlines (map showPair (Map.toList env)) ++ "\n"
-    where showPair (k, v) = show k ++ "\t->\t" ++ show v

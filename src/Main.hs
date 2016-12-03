@@ -1,6 +1,7 @@
 module Main where
 
 import Wiz.Types
+import Wiz.Environment
 import Wiz.Parser
 import Wiz.EvalApply
 import Wiz.Utils

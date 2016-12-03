@@ -3,6 +3,7 @@ module Wiz.EvalApply (
   ) where
 
 import Wiz.Types
+import Wiz.Environment
 import qualified Data.Map as Map
 import qualified Data.List as L
 import Data.Maybe

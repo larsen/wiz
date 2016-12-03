@@ -5,6 +5,7 @@ module Wiz.Parser (
   ) where
 
 import Wiz.Types
+import Wiz.Environment
 import Wiz.EvalApply
 import qualified Wiz.Utils as WU
 import Text.Parsec (ParseError)
