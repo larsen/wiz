@@ -10,16 +10,6 @@ import Data.Maybe
 import Text.Printf
 import Debug.Trace
 
-envLookup :: String -> Environment -> Expression
--- envLookup symbol env
---   | trace ("envlookup " ++ show symbol ++ " in\n" ++ show env) False = undefined
-
-envLookup symbol (Environment env) =
-  case res of
-    Just res -> res
-    Nothing -> error ("Unbound symbol " ++ show symbol)
-  where res = Map.lookup symbol env
-
 eval :: Form -> Environment -> (Environment, Maybe Expression)
 eval (FExpr (Definition sym expr)) env = (evalDefinition (Definition sym expr) env, Nothing)
 eval (FExpr expr) env = (env, Just $ evalExpr env expr)
