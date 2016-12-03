@@ -35,7 +35,7 @@ spec = describe "main" $ do
                       [Symbol "let",
                        List [List [Symbol "a", Number 10]], Symbol "a"]))
 
-    it "parses form /3" $
+    it "parses form /4" $
       parse pForm "(test)" "(let ((a 10) (b 20)) a)" `shouldBe`
         Right (FExpr (List
                       [Symbol "let",
