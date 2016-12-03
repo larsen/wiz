@@ -7,6 +7,7 @@ import Wiz.Utils
 import Wiz.Parser
 import Test.Hspec
 import Text.Parsec (parse)
+import Control.Exception (evaluate)
 
 import qualified Data.Map as Map
 
@@ -17,3 +18,5 @@ spec = describe "Environment tests" $ do
     let env = Environment (Map.fromList [("a", Number 10)])
     it "Basic variable lookup" $ do
       (envLookup "a" env) `shouldBe` (Number 10)
+    it "Unbound symbol" $ do
+      evaluate (envLookup "b" env) `shouldThrow` errorCall "Unbound symbol \"b\""
