@@ -14,8 +14,8 @@ eval (FExpr (Definition sym expr)) env = (evalDefinition (Definition sym expr) e
 eval (FExpr expr) env = (env, Just $ evalExpr env expr)
 
 evalDefinition :: Expression -> Environment -> Environment
-evalDefinition (Definition symbol expr) (Environment env) =
-  Environment (Map.insert symbol expr env)
+evalDefinition (Definition symbol expr) (Environment env parent) =
+  Environment (Map.insert symbol expr env) parent
 
 evalNum :: Expression -> Integer
 evalNum (Number n) = n

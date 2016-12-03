@@ -15,7 +15,7 @@ spec = describe "Environment tests" $ do
 
   describe "Basic lookup" $ do
 
-    let env = Environment (Map.fromList [("a", Number 10)])
+    let env = Environment (Map.fromList [("a", Number 10)]) Nothing
     it "Basic variable lookup" $ do
       (envLookup "a" env) `shouldBe` (Number 10)
     it "Unbound symbol" $ do

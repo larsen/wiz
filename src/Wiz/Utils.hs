@@ -9,5 +9,5 @@ import Wiz.EvalApply
 import qualified Data.Map as Map
 
 emptyEnv :: Environment
-emptyEnv = Environment (Map.fromList [])
+emptyEnv = Environment (Map.fromList []) Nothing
 
