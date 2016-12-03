@@ -109,6 +109,7 @@ apply :: Environment -> Expression -> [Expression] -> Expression
 -- apply env _ _ | trace ("apply in\n" ++ show env) False = undefined
 apply env (Lambda (Formals formals) body) arguments =
   evalExpr env' body
-  where env' = extendEnvironment env (zip formals evaledArguments)
+  where env' = encloseEnvironment env
+                 (extendEnvironment emptyEnv (zip formals evaledArguments))
         evaledArguments = map (evalExpr env) arguments
 apply _ _ _ = undefined
