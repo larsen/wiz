@@ -14,16 +14,16 @@ spec = describe "Environment tests" $ do
 
   describe "Basic lookup" $ do
 
-    let env = extendEnvironment emptyEnv [("a", Number 10)]
+    let env = extendEnvironment emptyEnv [("a", Value (Number 10))]
     it "Basic variable lookup" $ do
-      (envLookup "a" env) `shouldBe` (Number 10)
+      (envLookup "a" env) `shouldBe` (Value (Number 10))
     it "Unbound symbol" $ do
       evaluate (envLookup "b" env) `shouldThrow` errorCall "Unbound symbol \"b\""
 
   describe "Enclosed frames" $ do
-    let env = encloseEnvironment (extendEnvironment emptyEnv [("a", Number 10)]) -- parent
-              (extendEnvironment emptyEnv [("b", Number 20)]) -- child
+    let env = encloseEnvironment (extendEnvironment emptyEnv [("a", Value (Number 10))]) -- parent
+              (extendEnvironment emptyEnv [("b", Value (Number 20))]) -- child
     it "Lookup in parent environment /1" $ do
-      (envLookup "a" env) `shouldBe` (Number 10)
+      (envLookup "a" env) `shouldBe` (Value (Number 10))
     it "Lookup in parent environment /2" $ do
-      (envLookup "b" env) `shouldBe` (Number 20)
+      (envLookup "b" env) `shouldBe` (Value (Number 20))
