@@ -7,10 +7,9 @@ module Wiz.Parser (
 import Wiz.Types
 import Wiz.Environment
 import Wiz.EvalApply
-import Text.Parsec (ParseError)
 import Text.Parsec.String (Parser)
 import Text.Parsec.Token (parens)
-import Text.Parsec (parse, char, digit, string, oneOf, noneOf, try, (<|>))
+import Text.Parsec (ParseError, parse, char, digit, string, oneOf, noneOf, try, (<|>))
 import Text.Parsec.Combinator (choice, many1, manyTill)
 import Control.Applicative (many)
 import Control.Monad (void)

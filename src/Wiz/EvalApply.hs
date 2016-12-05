@@ -81,7 +81,7 @@ evalExpr env (Value expression) =
             -- Primitive procedures
             "=" -> equal (evalExpr env (Value (head xs)))
                          (evalExpr env (Value (head (tail xs))))
-            "or" -> Wiz.EvalApply.or (map ((evalExpr env) . Value) xs)
+            "or" -> Wiz.EvalApply.or (map (evalExpr env . Value) xs)
             "not" -> Wiz.EvalApply.not (evalExpr env (Value (head xs)))
             "nil?" -> nil (evalExpr env (Value (head xs)))
             "pair?" -> pair (evalExpr env (Value (head xs)))
