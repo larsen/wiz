@@ -9,13 +9,6 @@ import Data.Maybe
 import Text.Printf
 import Debug.Trace
 
--- TODO
--- Una funzione che trasforma una lista di Expression in una lista di
--- BoundValue
-
-hack :: [Expression] -> [BoundValue]
-hack = map Value
-
 eval :: Form -> Environment -> (Environment, Maybe Expression)
 eval (FExpr (Definition sym expr)) env =
   (evalDefinition (Value (Definition sym expr)) env, Nothing)
@@ -77,18 +70,18 @@ evalExpr env (Value expression) =
     List [] -> expression
     List exprs@(x:xs) ->
       case x of
-        Operator '*' -> Number (product (map (evalNum . evalExpr env) (hack xs)))
-        Operator '+' -> Number (sum (map (evalNum . evalExpr env) (hack xs)))
+        Operator '*' -> Number (product (map (evalNum . evalExpr env . Value) xs))
+        Operator '+' -> Number (sum (map (evalNum . evalExpr env . Value) xs))
         Operator '-' ->
           Number (foldl (-)
                   (evalNum $ evalExpr env (Value (head xs)))
-                  (map (evalNum . evalExpr env) (hack (tail xs))))
+                  (map (evalNum . evalExpr env . Value) (tail xs)))
         Symbol symbol ->
           case symbol of
             -- Primitive procedures
             "=" -> equal (evalExpr env (Value (head xs)))
                          (evalExpr env (Value (head (tail xs))))
-            "or" -> Wiz.EvalApply.or (map (evalExpr env) (hack xs))
+            "or" -> Wiz.EvalApply.or (map ((evalExpr env) . Value) xs)
             "not" -> Wiz.EvalApply.not (evalExpr env (Value (head xs)))
             "nil?" -> nil (evalExpr env (Value (head xs)))
             "pair?" -> pair (evalExpr env (Value (head xs)))
@@ -97,7 +90,7 @@ evalExpr env (Value expression) =
             "cons" -> cons env (head xs) (head (tail xs))
             "let" -> evalLet env (head xs) (Value (last xs))
             _ -> apply env (envLookup symbol env) xs
-        _ -> List (map (evalExpr env) (hack exprs))
+        _ -> List (map (evalExpr env . Value) exprs)
 
     Quote expr -> expr
     If test consequent alternate ->
@@ -115,7 +108,7 @@ listToList (List l) = l
 evalLet env (List bindings) body = evalExpr env' body
   where
     env' = encloseEnvironment env (extendEnvironment emptyEnv
-                                    (zip bindingsNames (hack bindingsExpressions)))
+                                    (zip bindingsNames (map Value bindingsExpressions)))
     bindingsNames = map ((symbolToString . head) . listToList) bindings
     bindingsExpressions = map (last . listToList) bindings
 
@@ -129,6 +122,6 @@ apply :: Environment -> BoundValue -> [Expression] -> Expression
 apply env (Value (Lambda (Formals formals) body)) arguments =
   evalExpr env' (Value body)
   where env' = encloseEnvironment env
-                 (extendEnvironment emptyEnv (zip formals (hack evaledArguments)))
-        evaledArguments = map (evalExpr env) (hack arguments)
+                 (extendEnvironment emptyEnv (zip formals (map Value evaledArguments)))
+        evaledArguments = map (evalExpr env . Value) arguments
 apply _ _ _ = undefined
