@@ -10,6 +10,7 @@ module Wiz.Environment (
 import Wiz.Types
 import qualified Data.Map as Map
 import qualified Data.List as L
+import Data.Maybe (fromMaybe)
 
 type Closure = (Expression, Environment)
 data BoundValue = Value Expression
@@ -42,9 +43,9 @@ envLookup :: String -> Environment -> BoundValue
 --   | trace ("envlookup " ++ show symbol ++ " in\n" ++ show env) False = undefined
 
 envLookup symbol (Environment env parent) =
-  case res of
-    Just res -> res
-    Nothing -> case parent of
+  fromMaybe
+    (case parent of
       Just p -> envLookup symbol p
-      Nothing -> error ("Unbound symbol " ++ show symbol)
+      Nothing -> error ("Unbound symbol " ++ show symbol))
+    res
   where res = Map.lookup symbol env
