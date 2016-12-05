@@ -14,7 +14,7 @@ import Debug.Trace
 -- BoundValue
 
 hack :: [Expression] -> [BoundValue]
-hack exprs = map (\e -> Value e) exprs
+hack = map Value
 
 eval :: Form -> Environment -> (Environment, Maybe Expression)
 eval (FExpr (Definition sym expr)) env =
@@ -59,7 +59,7 @@ not (Boolean False) = Boolean True
 not _ = Boolean False
 
 or :: [Expression] -> Expression
-or = Boolean . Prelude.or . map evalBool
+or = Boolean . any evalBool
 
 pair :: Expression -> Expression
 pair (List (x:_)) = Boolean True
@@ -101,9 +101,9 @@ evalExpr env (Value expression) =
 
     Quote expr -> expr
     If test consequent alternate ->
-      (if (evalBool $ evalExpr env (Value test)) then
-         (evalExpr env (Value consequent))
-       else (evalExpr env (Value alternate)))
+      if evalBool $ evalExpr env (Value test) then
+        evalExpr env (Value consequent)
+       else evalExpr env (Value alternate)
 
     Lambda formals body -> expression -- returns itself
 
@@ -116,8 +116,8 @@ evalLet env (List bindings) body = evalExpr env' body
   where
     env' = encloseEnvironment env (extendEnvironment emptyEnv
                                     (zip bindingsNames (hack bindingsExpressions)))
-    bindingsNames = map (symbolToString . head) $ map listToList bindings
-    bindingsExpressions = map last $ map listToList bindings
+    bindingsNames = map ((symbolToString . head) . listToList) bindings
+    bindingsExpressions = map (last . listToList) bindings
 
 -- Apply
 

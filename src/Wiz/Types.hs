@@ -34,7 +34,7 @@ instance Show Expression where
   show (Definition sym expr) =
     "(define " ++ sym ++ " (" ++ show expr ++ "))"
   show (Lambda (Formals formals) expr) =
-    "(λ (" ++ (L.unwords (map show formals)) ++ ") (" ++ show expr ++ "))"
+    "(λ (" ++ L.unwords (map show formals) ++ ") (" ++ show expr ++ "))"
 
 -- data Definition = Definition String Expression
 --   deriving (Show)
