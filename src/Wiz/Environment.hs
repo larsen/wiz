@@ -8,35 +8,34 @@ module Wiz.Environment (
 ) where
 
 import Wiz.Types
-import qualified Data.Map as Map
-import qualified Data.List as L
+import Data.Map hiding (map)
 import Data.Maybe (fromMaybe)
 
 type Closure = (Expression, Environment)
 data BoundValue = Value Expression
                 | Closure Closure
                   deriving (Show, Eq)
+
+type Bindings = Map String BoundValue
   
-data Environment = Environment { env :: Map.Map String BoundValue
+data Environment = Environment { env :: Bindings
                                , parent :: Maybe Environment
                                } deriving (Eq)
 
 instance Show Environment where
   show (Environment env parent) =
-    L.unlines (map showPair (Map.toList env)) ++ "\n"
+    unlines (map showPair $ toList env) ++ "\n"
     where showPair (k, v) = show k ++ "\t->\t" ++ show v
 
-type Binding = (String, BoundValue)
-
 emptyEnv :: Environment
-emptyEnv = Environment (Map.fromList []) Nothing
+emptyEnv = Environment (fromList []) Nothing
 
 encloseEnvironment :: Environment -> Environment -> Environment
 encloseEnvironment parentEnv childEnv = Environment (env childEnv) (Just parentEnv)
 
-extendEnvironment :: Environment -> [Binding] -> Environment
+extendEnvironment :: Environment -> Bindings -> Environment
 extendEnvironment (Environment env parent) bindings =
-  Environment (Map.union (Map.fromList bindings) env) parent
+  Environment (union bindings env) parent
 
 envLookup :: String -> Environment -> BoundValue
 -- envLookup symbol env
@@ -48,4 +47,4 @@ envLookup symbol (Environment env parent) =
       Just p -> envLookup symbol p
       Nothing -> error ("Unbound symbol " ++ show symbol))
     res
-  where res = Map.lookup symbol env
+  where res = Data.Map.lookup symbol env

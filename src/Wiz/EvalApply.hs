@@ -15,7 +15,8 @@ eval (FExpr (Definition sym expr)) env =
 eval (FExpr expr) env = (env, Just $ evalExpr env (Value expr))
 
 evalDefinition :: BoundValue -> Environment -> Environment
-evalDefinition (Value (Definition symbol expr)) env = extendEnvironment env [(symbol, Value expr)]
+evalDefinition (Value (Definition symbol expr)) env =
+  extendEnvironment env $ Map.fromList [(symbol, Value $ evalExpr env (Value expr))]
 
 evalNum :: Expression -> Integer
 evalNum (Number n) = n
@@ -107,8 +108,8 @@ listToList (List l) = l
 
 evalLet env (List bindings) body = evalExpr env' body
   where
-    env' = encloseEnvironment env (extendEnvironment emptyEnv
-                                    (zip bindingsNames (map Value bindingsExpressions)))
+    env' = encloseEnvironment env (extendEnvironment emptyEnv $
+                                    Map.fromList (zip bindingsNames (map Value bindingsExpressions)))
     bindingsNames = map ((symbolToString . head) . listToList) bindings
     bindingsExpressions = map (last . listToList) bindings
 
@@ -122,6 +123,6 @@ apply :: Environment -> BoundValue -> [Expression] -> Expression
 apply env (Value (Lambda (Formals formals) body)) arguments =
   evalExpr env' (Value body)
   where env' = encloseEnvironment env
-                 (extendEnvironment emptyEnv (zip formals (map Value evaledArguments)))
+                 (extendEnvironment emptyEnv $ Map.fromList (zip formals (map Value evaledArguments)))
         evaledArguments = map (evalExpr env . Value) arguments
 apply _ _ _ = undefined
