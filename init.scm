@@ -26,3 +26,8 @@
     (if (nil? lst)
         0
         (+ 1 (length (cdr lst))))))
+
+(define add1
+  (let ((one 1))
+    (lambda (addend)
+      (+ one addend))))
