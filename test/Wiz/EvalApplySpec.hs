@@ -1,11 +1,11 @@
 module Wiz.EvalApplySpec where
 
-import qualified Wiz.EvalApply as W
-import Wiz.Types
-import Wiz.Parser
-import Test.Hspec
-import Text.Parsec (parse)
 import qualified Data.Map as Map
+import           Test.Hspec
+import           Text.Parsec (parse)
+import qualified Wiz.EvalApply as W
+import           Wiz.Parser
+import           Wiz.Types
 
 import Text.ParserCombinators.Parsec.Error (
   ParseError,
