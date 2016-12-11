@@ -16,13 +16,14 @@ eval (FExpr (SetInstruction symbol expr)) env =
   (evalSetInstruction symbol expr env, Nothing)
 eval (FExpr expr) env = (env, Just $ evalExpr env expr)
 
+-- TODO refactor
 evalSetInstruction :: String -> Expression -> Environment -> Environment
 evalSetInstruction symbol expr env =
   changeValue env symbol (evalExpr env expr)
 
 evalDefinition :: Value -> Environment -> Environment
 evalDefinition (E (Definition symbol expr)) env =
-  extendEnvironment env $ Map.fromList [(symbol, evalExpr env expr)]
+  changeValue env symbol (evalExpr env expr)
 
 evalNum :: Value -> Integer
 evalNum (E (Number n)) = n
