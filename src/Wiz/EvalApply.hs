@@ -129,10 +129,10 @@ apply :: Environment -> Value -> [Expression] -> Value
 
 apply env (C ((Lambda (Formals formals) body), env')) arguments = 
   evalExpr env'' body
-  where env'' = composeEnvironments [env,
-                                     env',
-                                     extendEnvironment
-                                      emptyEnv $ Map.fromList (zip formals evaledArguments)
+  where env'' = composeEnvironments [ extendEnvironment
+                                      env' $ Map.fromList
+                                       (zip formals evaledArguments)
+                                    , env
                                     ] 
         evaledArguments = map (evalExpr env) arguments
 apply _ _ _ = undefined

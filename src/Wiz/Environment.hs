@@ -44,7 +44,7 @@ addEnvironment :: Environment -> Environment -> Environment
 addEnvironment e1 e2 = Environment { env = env e1, parent = Just e2 }
 
 composeEnvironments :: [Environment] -> Environment
-composeEnvironments es = foldr addEnvironment emptyEnv es
+composeEnvironments (e:es) = foldr addEnvironment e es
   
 encloseEnvironment :: Environment -> Environment -> Environment
 encloseEnvironment parentEnv childEnv = composeEnvironments [childEnv, parentEnv]
