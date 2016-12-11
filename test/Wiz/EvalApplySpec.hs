@@ -6,6 +6,7 @@ import           Text.Parsec (parse)
 import qualified Wiz.EvalApply as W
 import           Wiz.Parser
 import           Wiz.Types
+import           Wiz.Environment
 
 import Text.ParserCombinators.Parsec.Error (
   ParseError,
@@ -48,35 +49,35 @@ spec = describe "main" $ do
     it "eval numeric expressions as integers" $ do
       env <- loadProgram "init.scm"
       expr <- parseForm "1"
-      W.eval expr env `shouldBe` (env, Just (Number 1))
+      W.eval expr env `shouldBe` (env, Just (E $ Number 1))
 
     it "eval simple arithmetic operations" $ do
       env <- loadProgram "init.scm"
       expr <- parseForm "(+ 2 2)"
-      W.eval expr env `shouldBe` (env, Just (Number 4))
+      W.eval expr env `shouldBe` (env, Just (E $ Number 4))
 
     it "eval function calls /square" $ do
       env <- loadProgram "test/square.scm"
       expr <- parseForm "(square 10)"
-      W.eval expr env `shouldBe` (env, Just (Number 100))
+      W.eval expr env `shouldBe` (env, Just (E $ Number 100))
 
     it "eval recursive function calls /fact" $ do
       env <- loadProgram "init.scm"
       expr <- parseForm "(fact 10)"
-      W.eval expr env `shouldBe` (env, Just (Number 3628800))
+      W.eval expr env `shouldBe` (env, Just (E $ Number 3628800))
 
     it "eval another recursive function calls /length" $ do
       env <- loadProgram "init.scm"
       expr <- parseForm "(length '(1 2 3))"
-      W.eval expr env `shouldBe` (env, Just (Number 3))
+      W.eval expr env `shouldBe` (env, Just (E $ Number 3))
 
     it "eval (let) form" $ do
       env <- loadProgram "init.scm"
       expr <- parseForm "(let ((a 10) (b 20)) a)"
-      W.eval expr env `shouldBe` (env, Just (Number 10))
+      W.eval expr env `shouldBe` (env, Just (E $ Number 10))
 
     it "eval (let) form /2" $ do
       env <- loadProgram "init.scm"
       expr <- parseForm "(let ((a 10) (b 20)) (+ a b))"
-      W.eval expr env `shouldBe` (env, Just (Number 30))
+      W.eval expr env `shouldBe` (env, Just (E $ Number 30))
 
