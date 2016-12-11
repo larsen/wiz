@@ -62,44 +62,38 @@ pair _ = Boolean False
 evalExpr :: Environment -> Expression -> Value
 -- evalExpr env expr
 --   | trace ("evalExpr " ++ show expr ++ " in\n" ++ show env) False = undefined
-evalExpr env expression =
-  case expression of
-    Number n -> E $ Number n
-    Boolean b -> E $ Boolean b
-    Symbol s -> evalExpr env e
+evalExpr env (Number n) = E $ Number n
+evalExpr env (Boolean b) = E $ Boolean b
+evalExpr env (Symbol s) = evalExpr env e
       where E e = envLookup s env
-    List [] -> E expression
-    List exprs@(x:xs) ->
-      case x of
-        Operator '*' -> E (Number (product (map (evalNum . evalExpr env) xs)))
-        Operator '+' -> E (Number (sum (map (evalNum . evalExpr env) xs)))
-        Operator '-' ->
-          E (Number (foldl (-)
-                     (evalNum $ evalExpr env (head xs))
-                     (map (evalNum . evalExpr env) (tail xs))))
-        Symbol symbol ->
-          case symbol of
-            -- Primitive procedures
-            "=" -> E (equal (evalExpr env (head xs))
-                         (evalExpr env (head (tail xs))))
-            "or" -> E (Wiz.EvalApply.or (map (evalExpr env) xs))
-            "not" -> E (Wiz.EvalApply.not (evalExpr env (head xs)))
-            "nil?" -> E (nil (evalExpr env (head xs)))
-            "pair?" -> E (pair (evalExpr env (head xs)))
-            "car" -> E (car (evalExpr env (head xs)))
-            "cdr" -> E (cdr (evalExpr env (head xs)))
-            "cons" -> E (cons env (head xs) (head (tail xs)))
-            "let" -> evalLet env (head xs) (last xs)
-            _ -> apply env (envLookup symbol env) xs
-        _ -> E (List exprs)
-
-    Quote expr -> E expr
-    If test consequent alternate ->
-      if evalBool $ evalExpr env test then
-        evalExpr env consequent
-       else evalExpr env alternate
-
-    Lambda formals body -> E expression -- returns itself
+evalExpr env (List []) = E $ List []
+evalExpr env (Quote expression) = E expression
+evalExpr env (Lambda formals body) = E $ Lambda formals body
+evalExpr env (If test consequent alternate) = if evalBool $ evalExpr env test then
+                                                evalExpr env consequent
+                                              else evalExpr env alternate
+evalExpr env (List exprs@(x:xs)) =
+  case x of
+    Operator '*' -> E (Number (product (map (evalNum . evalExpr env) xs)))
+    Operator '+' -> E (Number (sum (map (evalNum . evalExpr env) xs)))
+    Operator '-' -> E (Number (foldl (-)
+                               (evalNum $ evalExpr env (head xs))
+                               (map (evalNum . evalExpr env) (tail xs))))
+    Symbol symbol ->
+      case symbol of
+        -- Primitive procedures
+        "=" -> E (equal (evalExpr env (head xs))
+                   (evalExpr env (head (tail xs))))
+        "or" -> E (Wiz.EvalApply.or (map (evalExpr env) xs))
+        "not" -> E (Wiz.EvalApply.not (evalExpr env (head xs)))
+        "nil?" -> E (nil (evalExpr env (head xs)))
+        "pair?" -> E (pair (evalExpr env (head xs)))
+        "car" -> E (car (evalExpr env (head xs)))
+        "cdr" -> E (cdr (evalExpr env (head xs)))
+        "cons" -> E (cons env (head xs) (head (tail xs)))
+        "let" -> evalLet env (head xs) (last xs)
+        _ -> apply env (envLookup symbol env) xs
+    _ -> E (List exprs)
 
 symbolToString :: Expression -> String
 symbolToString (Symbol s) = s
