@@ -86,6 +86,11 @@ spec = describe "main" $ do
       expr <- parseForm "(add1 10)"
       W.eval expr env `shouldBe` (env, Just (E $ Number 11))
 
+    it "procedure returning closure" $ do
+      env <- loadProgram "test/closure.scm"
+      expr <- parseForm "(m 10)"
+      W.eval expr env `shouldBe` (env, Just (E $ Number 20))
+
   describe "set!" $ do
     it "eval set!" $ do
       env <- loadProgram "test/set.scm"
