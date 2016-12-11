@@ -65,7 +65,7 @@ evalExpr :: Environment -> Expression -> Value
 evalExpr env (Number n)                     = E $ Number n
 evalExpr env (Boolean b)                    = E $ Boolean b
 evalExpr env (Quote expression)             = E expression
-evalExpr env (Lambda formals body)          = C $ (Lambda formals body, env)
+evalExpr env (Lambda formals body)          = C (Lambda formals body, env)
 evalExpr env (If test consequent alternate) = if evalBool $ evalExpr env test then
                                                 evalExpr env consequent
                                               else evalExpr env alternate
