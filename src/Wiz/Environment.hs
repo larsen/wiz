@@ -3,6 +3,7 @@ module Wiz.Environment (
   envLookup,
   extendEnvironment,
   encloseEnvironment,
+  composeEnvironments,
   Value( E, C ),
   Environment( Environment )
 ) where
@@ -30,8 +31,12 @@ instance Show Environment where
 emptyEnv :: Environment
 emptyEnv = Environment (fromList []) Nothing
 
+composeEnvironments :: [Environment] -> Environment
+composeEnvironments (e:[]) = Environment (env e) (Just emptyEnv)
+composeEnvironments (e:es) = Environment (env (composeEnvironments es)) (Just e)
+
 encloseEnvironment :: Environment -> Environment -> Environment
-encloseEnvironment parentEnv childEnv = Environment (env childEnv) (Just parentEnv)
+encloseEnvironment parentEnv childEnv = composeEnvironments [childEnv, parentEnv]
 
 extendEnvironment :: Environment -> Bindings -> Environment
 extendEnvironment (Environment env parent) bindings =
