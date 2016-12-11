@@ -1,6 +1,15 @@
 module Wiz.Types (
     Formals( Formals ),
-    Expression( Number, Boolean, Operator, Symbol, Quote, If, Definition, Lambda, List ),
+    Expression(
+        Number,
+        Boolean,
+        Operator,
+        Symbol,
+        Quote,
+        If,
+        Definition,
+        Lambda,
+        List ),
     Form (FExpr),
     Program (Program),
   ) where
