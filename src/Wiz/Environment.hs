@@ -21,7 +21,7 @@ data Value = E Expression
 
 instance Show Value where
   show (E expression) = show expression
-  show (C (expression, env)) = show expression
+  show (C (expression, env)) = show expression ++ "\nin " ++ show env
 
 type Bindings = Map String Value
   
@@ -30,11 +30,12 @@ data Environment = Environment { env :: Bindings
                                } deriving (Eq)
 
 instance Show Environment where
-  show (Environment env parent) =
-    unlines (map showPair $ toList env) ++ "\n" ++ case parent of
-                                                     Just p -> show p
-                                                     Nothing -> ""
-    where showPair (k, v) = show k ++ "\t->\t" ++ show v
+  show environment = recursiveShow 0 environment
+    where recursiveShow level (Environment e parent) =
+            "ENV: " ++ concat (replicate level "\t") ++ unlines (map showPair $ toList e) ++ case parent of
+                                             Just p -> "\n" ++ recursiveShow (level +1) p
+                                             Nothing -> "\nNO PARENT"
+          showPair (k, v) = show k ++ "\t->\t" ++ show v
 
 emptyEnv :: Environment
 emptyEnv = Environment (fromList []) Nothing
