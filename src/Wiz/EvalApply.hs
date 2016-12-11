@@ -111,9 +111,10 @@ symbolToString (Symbol s) = s
 listToList (List l) = l
 
 evalLet env (List bindings) body = evalExpr env' body
-  where
-    env' = encloseEnvironment env (extendEnvironment emptyEnv $
-                                    Map.fromList (zip bindingsNames (map E bindingsExpressions)))
+  where 
+    env' = encloseEnvironment env
+      (extendEnvironment env $ Map.fromList
+       (zip bindingsNames (map E bindingsExpressions)))
     bindingsNames = map ((symbolToString . head) . listToList) bindings
     bindingsExpressions = map (last . listToList) bindings
 
