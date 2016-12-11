@@ -81,3 +81,8 @@ spec = describe "main" $ do
       expr <- parseForm "(let ((a 10) (b 20)) (+ a b))"
       W.eval expr env `shouldBe` (env, Just (E $ Number 30))
 
+    it "eval closure form" $ do
+      env <- loadProgram "init.scm"
+      expr <- parseForm "(add1 10)"
+      W.eval expr env `shouldBe` (env, Just (E $ Number 11))
+

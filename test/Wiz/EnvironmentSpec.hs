@@ -22,9 +22,20 @@ spec = describe "Environment tests" $ do
       evaluate (envLookup "b" env) `shouldThrow` errorCall "Unbound symbol \"b\""
 
   describe "Enclosed frames" $ do
-    let env = encloseEnvironment (extendEnvironment emptyEnv $ Data.Map.fromList [("a", E (Number 10))]) -- parent
-              (extendEnvironment emptyEnv $ Data.Map.fromList [("b", E (Number 20))]) -- child
+    let env = encloseEnvironment (extendEnvironment emptyEnv $
+                                  Data.Map.fromList [("a", E (Number 10))]) -- parent
+              (extendEnvironment emptyEnv $
+               Data.Map.fromList [("b", E (Number 20))]) -- child
     it "Lookup in parent environment /1" $ do
       (envLookup "a" env) `shouldBe` (E (Number 10))
     it "Lookup in parent environment /2" $ do
       (envLookup "b" env) `shouldBe` (E (Number 20))
+
+  describe "Multiple enclosed frames" $ do
+    let env = composeEnvironments [emptyEnv,
+                                   (extendEnvironment emptyEnv $
+                                    Data.Map.fromList [("a", E (Number 10))]),
+                                   (extendEnvironment emptyEnv $
+                                    Data.Map.fromList [("b", E (Number 20))])]
+    it "Lookup in multiple environment /1" $ do
+      (envLookup "a" env) `shouldBe` (E (Number 10))

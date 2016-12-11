@@ -73,7 +73,7 @@ evalExpr env (If test consequent alternate) = if evalBool $ evalExpr env test th
 evalExpr env (Symbol s) =
   case envLookup s env of
     E e -> evalExpr env e
-    C (c, env') -> evalExpr env c
+    C (c, env') -> evalExpr env' c
 
 evalExpr env (List [])           = E $ List []
 evalExpr env (List exprs@(x:xs)) =

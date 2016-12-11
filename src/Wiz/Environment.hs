@@ -3,13 +3,14 @@ module Wiz.Environment (
   envLookup,
   extendEnvironment,
   encloseEnvironment,
+  addEnvironment,
   composeEnvironments,
   Value( E, C ),
   Environment( Environment )
 ) where
 
 import Wiz.Types
-import Data.Map hiding (map)
+import Data.Map hiding (map, foldr)
 import Data.Maybe (fromMaybe)
 
 type Closure = (Expression, Environment)
@@ -29,16 +30,20 @@ data Environment = Environment { env :: Bindings
 
 instance Show Environment where
   show (Environment env parent) =
-    unlines (map showPair $ toList env) ++ "\n"
+    unlines (map showPair $ toList env) ++ "\n" ++ case parent of
+                                                     Just p -> show p
+                                                     Nothing -> ""
     where showPair (k, v) = show k ++ "\t->\t" ++ show v
 
 emptyEnv :: Environment
 emptyEnv = Environment (fromList []) Nothing
 
-composeEnvironments :: [Environment] -> Environment
-composeEnvironments [e] = Environment (env e) (Just emptyEnv)
-composeEnvironments (e:es) = Environment (env (composeEnvironments es)) (Just e)
+addEnvironment :: Environment -> Environment -> Environment
+addEnvironment e1 e2 = Environment { env = env e1, parent = Just e2 }
 
+composeEnvironments :: [Environment] -> Environment
+composeEnvironments es = foldr addEnvironment emptyEnv es
+  
 encloseEnvironment :: Environment -> Environment -> Environment
 encloseEnvironment parentEnv childEnv = composeEnvironments [childEnv, parentEnv]
 
