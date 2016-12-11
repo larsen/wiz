@@ -11,12 +11,13 @@ import Debug.Trace
 
 eval :: Form -> Environment -> (Environment, Maybe Expression)
 eval (FExpr (Definition sym expr)) env =
-  (evalDefinition (Value (Definition sym expr)) env, Nothing)
-eval (FExpr expr) env = (env, Just $ evalExpr env (Value expr))
+  (evalDefinition (E (Definition sym expr)) env, Nothing)
+eval (FExpr expr) env = (env, Just $ evalExpr env (E expr))
 
-evalDefinition :: BoundValue -> Environment -> Environment
-evalDefinition (Value (Definition symbol expr)) env =
-  extendEnvironment env $ Map.fromList [(symbol, Value $ evalExpr env (Value expr))]
+
+evalDefinition :: Value -> Environment -> Environment
+evalDefinition (E (Definition symbol expr)) env =
+  extendEnvironment env $ Map.fromList [(symbol, E $ evalExpr env (E expr))]
 
 evalNum :: Expression -> Integer
 evalNum (Number n) = n
@@ -41,8 +42,8 @@ cdr (List []) = List []
 cdr _ = error "car applied to non list expression!"
 
 cons :: Environment -> Expression -> Expression -> Expression
-cons env x (List []) = List [evalExpr env (Value x)]
-cons env x y = List [evalExpr env (Value x), evalExpr env (Value y)]
+cons env x (List []) = List [evalExpr env (E x)]
+cons env x y = List [evalExpr env (E x), evalExpr env (E y)]
 
 nil :: Expression -> Expression
 nil (List []) = Boolean True
@@ -59,10 +60,10 @@ pair :: Expression -> Expression
 pair (List (x:_)) = Boolean True
 pair _ = Boolean False
 
-evalExpr :: Environment -> BoundValue -> Expression
+evalExpr :: Environment -> Value -> Expression
 -- evalExpr env expr
 --   | trace ("evalExpr " ++ show expr ++ " in\n" ++ show env) False = undefined
-evalExpr env (Value expression) =
+evalExpr env (E expression) =
   case expression of
     Number n -> Number n
     Boolean b -> Boolean b
@@ -71,33 +72,33 @@ evalExpr env (Value expression) =
     List [] -> expression
     List exprs@(x:xs) ->
       case x of
-        Operator '*' -> Number (product (map (evalNum . evalExpr env . Value) xs))
-        Operator '+' -> Number (sum (map (evalNum . evalExpr env . Value) xs))
+        Operator '*' -> Number (product (map (evalNum . evalExpr env . E) xs))
+        Operator '+' -> Number (sum (map (evalNum . evalExpr env . E) xs))
         Operator '-' ->
           Number (foldl (-)
-                  (evalNum $ evalExpr env (Value (head xs)))
-                  (map (evalNum . evalExpr env . Value) (tail xs)))
+                  (evalNum $ evalExpr env (E (head xs)))
+                  (map (evalNum . evalExpr env . E) (tail xs)))
         Symbol symbol ->
           case symbol of
             -- Primitive procedures
-            "=" -> equal (evalExpr env (Value (head xs)))
-                         (evalExpr env (Value (head (tail xs))))
-            "or" -> Wiz.EvalApply.or (map (evalExpr env . Value) xs)
-            "not" -> Wiz.EvalApply.not (evalExpr env (Value (head xs)))
-            "nil?" -> nil (evalExpr env (Value (head xs)))
-            "pair?" -> pair (evalExpr env (Value (head xs)))
-            "car" -> car (evalExpr env (Value (head xs)))
-            "cdr" -> cdr (evalExpr env (Value (head xs)))
+            "=" -> equal (evalExpr env (E (head xs)))
+                         (evalExpr env (E (head (tail xs))))
+            "or" -> Wiz.EvalApply.or (map (evalExpr env . E) xs)
+            "not" -> Wiz.EvalApply.not (evalExpr env (E (head xs)))
+            "nil?" -> nil (evalExpr env (E (head xs)))
+            "pair?" -> pair (evalExpr env (E (head xs)))
+            "car" -> car (evalExpr env (E (head xs)))
+            "cdr" -> cdr (evalExpr env (E (head xs)))
             "cons" -> cons env (head xs) (head (tail xs))
-            "let" -> evalLet env (head xs) (Value (last xs))
+            "let" -> evalLet env (head xs) (E (last xs))
             _ -> apply env (envLookup symbol env) xs
-        _ -> List (map (evalExpr env . Value) exprs)
+        _ -> List (map (evalExpr env . E) exprs)
 
     Quote expr -> expr
     If test consequent alternate ->
-      if evalBool $ evalExpr env (Value test) then
-        evalExpr env (Value consequent)
-       else evalExpr env (Value alternate)
+      if evalBool $ evalExpr env (E test) then
+        evalExpr env (E consequent)
+       else evalExpr env (E alternate)
 
     Lambda formals body -> expression -- returns itself
 
@@ -109,7 +110,7 @@ listToList (List l) = l
 evalLet env (List bindings) body = evalExpr env' body
   where
     env' = encloseEnvironment env (extendEnvironment emptyEnv $
-                                    Map.fromList (zip bindingsNames (map Value bindingsExpressions)))
+                                    Map.fromList (zip bindingsNames (map E bindingsExpressions)))
     bindingsNames = map ((symbolToString . head) . listToList) bindings
     bindingsExpressions = map (last . listToList) bindings
 
@@ -118,11 +119,11 @@ evalLet env (List bindings) body = evalExpr env' body
 -- "A procedure is, slightly simplified,
 -- an abstraction of an expression over objects."
 
-apply :: Environment -> BoundValue -> [Expression] -> Expression
+apply :: Environment -> Value -> [Expression] -> Expression
 -- apply env _ _ | trace ("apply in\n" ++ show env) False = undefined
-apply env (Value (Lambda (Formals formals) body)) arguments =
-  evalExpr env' (Value body)
+apply env (E (Lambda (Formals formals) body)) arguments =
+  evalExpr env' (E body)
   where env' = encloseEnvironment env
-                 (extendEnvironment emptyEnv $ Map.fromList (zip formals (map Value evaledArguments)))
-        evaledArguments = map (evalExpr env . Value) arguments
+                 (extendEnvironment emptyEnv $ Map.fromList (zip formals (map E evaledArguments)))
+        evaledArguments = map (evalExpr env . E) arguments
 apply _ _ _ = undefined

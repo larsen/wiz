@@ -3,7 +3,7 @@ module Wiz.Environment (
   envLookup,
   extendEnvironment,
   encloseEnvironment,
-  BoundValue( Value, Closure ),
+  Value( E, C ),
   Environment( Environment )
 ) where
 
@@ -12,11 +12,11 @@ import Data.Map hiding (map)
 import Data.Maybe (fromMaybe)
 
 type Closure = (Expression, Environment)
-data BoundValue = Value Expression
-                | Closure Closure
-                  deriving (Show, Eq)
+data Value = E Expression
+           | C Closure
+             deriving (Show, Eq)
 
-type Bindings = Map String BoundValue
+type Bindings = Map String Value
   
 data Environment = Environment { env :: Bindings
                                , parent :: Maybe Environment
@@ -37,7 +37,7 @@ extendEnvironment :: Environment -> Bindings -> Environment
 extendEnvironment (Environment env parent) bindings =
   Environment (union bindings env) parent
 
-envLookup :: String -> Environment -> BoundValue
+envLookup :: String -> Environment -> Value
 -- envLookup symbol env
 --   | trace ("envlookup " ++ show symbol ++ " in\n" ++ show env) False = undefined
 
