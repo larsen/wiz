@@ -62,16 +62,18 @@ pair _ = Boolean False
 evalExpr :: Environment -> Expression -> Value
 -- evalExpr env expr
 --   | trace ("evalExpr " ++ show expr ++ " in\n" ++ show env) False = undefined
-evalExpr env (Number n) = E $ Number n
-evalExpr env (Boolean b) = E $ Boolean b
-evalExpr env (Symbol s) = evalExpr env e
-      where E e = envLookup s env
-evalExpr env (List []) = E $ List []
-evalExpr env (Quote expression) = E expression
-evalExpr env (Lambda formals body) = E $ Lambda formals body
+evalExpr env (Number n)                     = E $ Number n
+evalExpr env (Boolean b)                    = E $ Boolean b
+evalExpr env (Quote expression)             = E expression
+evalExpr env (Lambda formals body)          = E $ Lambda formals body
 evalExpr env (If test consequent alternate) = if evalBool $ evalExpr env test then
                                                 evalExpr env consequent
                                               else evalExpr env alternate
+
+evalExpr env (Symbol s)                     = evalExpr env e
+  where E e = envLookup s env
+
+evalExpr env (List [])           = E $ List []
 evalExpr env (List exprs@(x:xs)) =
   case x of
     Operator '*' -> E (Number (product (map (evalNum . evalExpr env) xs)))
