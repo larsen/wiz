@@ -65,7 +65,7 @@ evalExpr :: Environment -> Expression -> Value
 evalExpr env (Number n)                     = E $ Number n
 evalExpr env (Boolean b)                    = E $ Boolean b
 evalExpr env (Quote expression)             = E expression
-evalExpr env (Lambda formals body)          = E $ Lambda formals body
+evalExpr env (Lambda formals body)          = C $ (Lambda formals body, env)
 evalExpr env (If test consequent alternate) = if evalBool $ evalExpr env test then
                                                 evalExpr env consequent
                                               else evalExpr env alternate
@@ -116,9 +116,11 @@ evalLet env (List bindings) body = evalExpr env' body
 
 apply :: Environment -> Value -> [Expression] -> Value
 -- apply env _ _ | trace ("apply in\n" ++ show env) False = undefined
-apply env (E (Lambda (Formals formals) body)) arguments =
-  evalExpr env' body
-  where env' = encloseEnvironment env
-                 (extendEnvironment emptyEnv $ Map.fromList (zip formals evaledArguments))
+
+apply env (C ((Lambda (Formals formals) body), env')) arguments = 
+  evalExpr env''' body
+  where env'' = encloseEnvironment env' env
+        env''' = encloseEnvironment env''
+          (extendEnvironment env $ Map.fromList (zip formals evaledArguments))
         evaledArguments = map (evalExpr env) arguments
 apply _ _ _ = undefined
