@@ -15,7 +15,11 @@ import Data.Maybe (fromMaybe)
 type Closure = (Expression, Environment)
 data Value = E Expression
            | C Closure
-             deriving (Show, Eq)
+             deriving (Eq)
+
+instance Show Value where
+  show (E expression) = show expression
+  show (C (expression, env)) = show expression
 
 type Bindings = Map String Value
   
