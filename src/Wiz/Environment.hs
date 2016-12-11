@@ -36,7 +36,7 @@ emptyEnv :: Environment
 emptyEnv = Environment (fromList []) Nothing
 
 composeEnvironments :: [Environment] -> Environment
-composeEnvironments (e:[]) = Environment (env e) (Just emptyEnv)
+composeEnvironments [e] = Environment (env e) (Just emptyEnv)
 composeEnvironments (e:es) = Environment (env (composeEnvironments es)) (Just e)
 
 encloseEnvironment :: Environment -> Environment -> Environment
