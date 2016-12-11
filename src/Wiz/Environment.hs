@@ -5,6 +5,7 @@ module Wiz.Environment (
   encloseEnvironment,
   addEnvironment,
   composeEnvironments,
+  changeValue,
   Value( E, C ),
   Environment( Environment )
 ) where
@@ -62,3 +63,9 @@ envLookup symbol (Environment env parent) =
       Nothing -> error ("Unbound symbol " ++ show symbol))
     res
   where res = Data.Map.lookup symbol env
+
+changeValue :: Environment -> String -> Value -> Environment
+changeValue e symbol value = 
+  Environment { env = insert symbol value (env e)
+              , parent = parent e
+              }

@@ -9,7 +9,8 @@ module Wiz.Types (
         If,
         Definition,
         Lambda,
-        List ),
+        List,
+        SetInstruction ),
     Form (FExpr),
     Program (Program),
   ) where
@@ -29,6 +30,7 @@ data Expression = Number Integer
                 | Definition String Expression
                 | Lambda Formals Expression
                 | List [Expression]
+                | SetInstruction String Expression
                   deriving (Eq)
 
 instance Show Expression where

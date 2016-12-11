@@ -63,6 +63,7 @@ pExpression =
   <|> try pQuote
   <|> try pIf
   <|> try pLambda
+  <|> try pSet
   <|> try pList
 
 pExpr :: Parser Form
@@ -97,6 +98,18 @@ pList = do
   exprs <- many pExpression
   closedParens
   return $ List exprs
+
+pSet :: Parser Expression
+pSet = do
+  openParens
+  void $ string "set!"
+  void whitespace
+  name <- pIdentifier
+  void whitespace
+  expr <- pExpression
+  void whitespace
+  closedParens
+  return $ SetInstruction name expr
 
 pLambda :: Parser Expression
 pLambda = do

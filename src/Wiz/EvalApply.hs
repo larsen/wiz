@@ -12,7 +12,13 @@ import Debug.Trace
 eval :: Form -> Environment -> (Environment, Maybe Value)
 eval (FExpr (Definition sym expr)) env =
   (evalDefinition (E (Definition sym expr)) env, Nothing)
+eval (FExpr (SetInstruction symbol expr)) env =
+  (evalSetInstruction symbol expr env, Nothing)
 eval (FExpr expr) env = (env, Just $ evalExpr env expr)
+
+evalSetInstruction :: String -> Expression -> Environment -> Environment
+evalSetInstruction symbol expr env =
+  changeValue env symbol (evalExpr env expr)
 
 evalDefinition :: Value -> Environment -> Environment
 evalDefinition (E (Definition symbol expr)) env =

@@ -86,3 +86,8 @@ spec = describe "main" $ do
       expr <- parseForm "(add1 10)"
       W.eval expr env `shouldBe` (env, Just (E $ Number 11))
 
+  describe "set!" $ do
+    it "eval set!" $ do
+      env <- loadProgram "test/set.scm"
+      expr <- parseForm "a"
+      W.eval expr env `shouldBe` (env, Just (E $ Number 20))
