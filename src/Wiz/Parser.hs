@@ -131,7 +131,7 @@ pIdentifier = do
 pSymbol :: Parser Expression
 pSymbol = do
   void whitespace
-  name <- many1 (noneOf " '-+()\n\t")
+  name <- many1 (noneOf " '()\n\t")
   void whitespace
   return $ Symbol name
 

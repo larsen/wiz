@@ -1,6 +1,6 @@
-(define makeadder
+(define make-adder
   (lambda (base)
     (lambda (n)
       (+ n base))))
 
-(define m (makeadder 10))
+(define m (make-adder 10))
