@@ -30,7 +30,7 @@ data Environment = Environment { env :: Bindings
                                } deriving (Eq)
 
 instance Show Environment where
-  show environment = recursiveShow 0 environment
+  show = recursiveShow 0
     where recursiveShow level (Environment e parent) =
             "ENV: " ++ concat (replicate level "\t") ++ unlines (map showPair $ toList e) ++ case parent of
                                              Just p -> "\n" ++ recursiveShow (level +1) p
