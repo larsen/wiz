@@ -127,7 +127,7 @@ evalLet env (List bindings) body = evalExpr env' body
 apply :: Environment -> Value -> [Expression] -> Value
 -- apply env _ _ | trace ("apply in\n" ++ show env) False = undefined
 
-apply env (C ((Lambda (Formals formals) body), env')) arguments = 
+apply env (C (Lambda (Formals formals) body, env')) arguments = 
   evalExpr env'' body
   where env'' = composeEnvironments [ extendEnvironment
                                       env' $ Map.fromList
