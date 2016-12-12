@@ -49,7 +49,13 @@ pNumber = do
 
 pOperator :: Parser Expression
 pOperator = do
-  o <- choice [char '+', char '*', char '-']
+  o <- choice [ string "+"
+              , string "*"
+              , string "-"
+              , string ">"
+              , string "<"
+              , string ">="
+              , string "<=" ]
   return $ Operator o
 
 -- Il problema e` nelle seguenti due definizioni

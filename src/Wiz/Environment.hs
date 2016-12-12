@@ -17,7 +17,7 @@ import Data.Maybe (fromMaybe)
 type Closure = (Expression, Environment)
 data Value = E Expression
            | C Closure
-             deriving (Eq)
+             deriving (Eq, Ord)
 
 instance Show Value where
   show (E expression) = show expression
@@ -27,7 +27,7 @@ type Bindings = Map String Value
   
 data Environment = Environment { env :: Bindings
                                , parent :: Maybe Environment
-                               } deriving (Eq)
+                               } deriving (Eq, Ord)
 
 instance Show Environment where
   show = recursiveShow 0

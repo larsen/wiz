@@ -19,11 +19,11 @@ import qualified Data.List as L
 import qualified Data.Map as Map
 
 data Formals = Formals [String]
-  deriving (Eq, Show)
+  deriving (Eq, Show, Ord)
 
 data Expression = Number Integer
                 | Boolean Bool
-                | Operator Char
+                | Operator String
                 | Symbol String
                 | Quote Expression
                 | If Expression Expression Expression
@@ -31,7 +31,7 @@ data Expression = Number Integer
                 | Lambda Formals Expression
                 | List [Expression]
                 | SetInstruction String Expression
-                  deriving (Eq)
+                  deriving (Eq, Ord)
 
 instance Show Expression where
   show (Number n) = show n

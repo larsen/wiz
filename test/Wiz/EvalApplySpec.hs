@@ -56,6 +56,16 @@ spec = describe "main" $ do
       expr <- parseForm "(+ 2 2)"
       W.eval expr env `shouldBe` (env, Just (E $ Number 4))
 
+    it "eval simple comparison operator" $ do
+      env <- loadProgram "init.scm"
+      expr <- parseForm "(< 1 2)"
+      W.eval expr env `shouldBe` (env, Just (E $ Boolean True))
+
+    it "eval simple comparison operator /2" $ do
+      env <- loadProgram "init.scm"
+      expr <- parseForm "(> 1 2)"
+      W.eval expr env `shouldBe` (env, Just (E $ Boolean False))
+
     it "eval function calls /square" $ do
       env <- loadProgram "test/square.scm"
       expr <- parseForm "(square 10)"
