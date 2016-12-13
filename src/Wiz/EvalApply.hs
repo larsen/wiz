@@ -66,6 +66,10 @@ pair :: Value -> Expression
 pair (E (List (x:_))) = Boolean True
 pair _ = Boolean False
 
+compareList :: (Ord a) => (a -> a -> Bool) -> [a] -> Bool
+compareList _ [] = True
+compareList f list = and $ zipWith f list (tail list)
+
 evalExpr :: Environment -> Expression -> Value
 -- evalExpr env expr
 --   | trace ("evalExpr " ++ show expr ++ " in\n" ++ show env) False = undefined
