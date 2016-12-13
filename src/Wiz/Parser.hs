@@ -7,6 +7,7 @@ module Wiz.Parser (
 import Wiz.Types
 import Wiz.Environment
 import Wiz.EvalApply
+import Text.Parsec.Char (spaces)
 import Text.Parsec.String (Parser)
 import Text.Parsec.Token (parens)
 import Text.Parsec (ParseError, parse, char, digit, string, oneOf, noneOf, try, (<|>))
@@ -16,22 +17,19 @@ import Control.Monad (void)
 
 -- Parser
 
-whitespace :: Parser ()
-whitespace = void $ many $ oneOf " \n\t"
-
 openParens = do
-  void whitespace
+  void spaces
   void $ char '('
-  void whitespace
+  void spaces
 
 closedParens = do
-  void whitespace
+  void spaces
   void $ char ')'
-  void whitespace
+  void spaces
 
 pBoolean :: Parser Expression
 pBoolean = do
-  void whitespace
+  void spaces
   try (do
     string "#t"
     return (Boolean True))
@@ -42,9 +40,9 @@ pBoolean = do
 
 pNumber :: Parser Expression
 pNumber = do
-  void whitespace
+  void spaces
   n <- many1 digit
-  void whitespace
+  void spaces
   return $ Number (read n)
 
 pOperator :: Parser Expression
@@ -56,7 +54,7 @@ pOperator = do
               , try (string "<=")
               , try (string ">")
               , try (string "<") ]
-  void whitespace
+  void spaces
   return $ Operator o
 
 -- Il problema e` nelle seguenti due definizioni
@@ -90,11 +88,11 @@ pIf :: Parser Expression
 pIf = do
   openParens
   void $ string "if"
-  void whitespace
+  void spaces
   test <- pExpression
-  void whitespace
+  void spaces
   consequent <- pExpression
-  void whitespace
+  void spaces
   alternate <- pExpression
   closedParens
   return $ If test consequent alternate
@@ -110,11 +108,11 @@ pSet :: Parser Expression
 pSet = do
   openParens
   void $ string "set!"
-  void whitespace
+  void spaces
   name <- pIdentifier
-  void whitespace
+  void spaces
   expr <- pExpression
-  void whitespace
+  void spaces
   closedParens
   return $ SetInstruction name expr
 
@@ -122,7 +120,7 @@ pLambda :: Parser Expression
 pLambda = do
   openParens
   void $ string "lambda"
-  void whitespace
+  void spaces
   formals <- pFormals
   expr <- pExpression
   closedParens
@@ -130,21 +128,21 @@ pLambda = do
 
 pIdentifier :: Parser String
 pIdentifier = do
-  void whitespace
+  void spaces
   name <- many1 (noneOf " '()\n\t")
-  void whitespace
+  void spaces
   return name
 
 pSymbol :: Parser Expression
 pSymbol = do
-  void whitespace
+  void spaces
   name <- many1 (noneOf " '()\n\t")
-  void whitespace
+  void spaces
   return $ Symbol name
 
 pQuote :: Parser Expression
 pQuote = do
-  void whitespace
+  void spaces
   void $ char '\''
   expr <- pExpression
   return $ Quote expr
@@ -153,9 +151,9 @@ pDefinition :: Parser Expression
 pDefinition = do
   openParens
   void $ string "define"
-  void whitespace
+  void spaces
   name <- pIdentifier
-  void whitespace
+  void spaces
   expr <- pExpression
   closedParens
   return $ Definition name expr
