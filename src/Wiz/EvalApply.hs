@@ -89,10 +89,10 @@ evalExpr env (Symbol s) =
 evalExpr env (List [])           = E $ List []
 evalExpr env (List exprs@(x:xs)) =
   case x of
-    Operator "<" -> E (Boolean ((evalExpr env (head xs)) <
-                                 (evalExpr env (head (tail xs)))))
-    Operator ">" -> E (Boolean ((evalExpr env (head xs)) >
-                                 (evalExpr env (head (tail xs)))))
+    Operator "<"  -> E (Boolean $ compareList (<)  (map (evalNum . evalExpr env) xs))
+    Operator ">"  -> E (Boolean $ compareList (>)  (map (evalNum . evalExpr env) xs))
+    Operator "<=" -> E (Boolean $ compareList (<=) (map (evalNum . evalExpr env) xs))
+    Operator ">=" -> E (Boolean $ compareList (>=) (map (evalNum . evalExpr env) xs))
     Operator "*" -> E (Number (product (map (evalNum . evalExpr env) xs)))
     Operator "+" -> E (Number (sum (map (evalNum . evalExpr env) xs)))
     Operator "-" -> E (Number (foldl (-)

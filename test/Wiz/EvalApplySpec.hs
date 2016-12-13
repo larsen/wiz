@@ -43,6 +43,12 @@ spec = describe "main" $ do
                        List [List [Symbol "a", Number 10],
                              List [Symbol "b", Number 20]], Symbol "a"]))
 
+    it "parses form /5" $
+      parse pForm "(test)" "(<= 1 2)" `shouldBe`
+        Right (FExpr (List
+                      [Operator "<=",
+                       Number 1,
+                       Number 2]))
 
   describe "eval" $ do
 
@@ -64,6 +70,16 @@ spec = describe "main" $ do
     it "eval simple comparison operator /2" $ do
       env <- loadProgram "init.scm"
       expr <- parseForm "(> 1 2)"
+      W.eval expr env `shouldBe` (env, Just (E $ Boolean False))
+
+    it "eval simple comparison operator /3" $ do
+      env <- loadProgram "init.scm"
+      expr <- parseForm "(> 3 2 5)"
+      W.eval expr env `shouldBe` (env, Just (E $ Boolean False))
+
+    it "eval simple comparison operator /3" $ do
+      env <- loadProgram "init.scm"
+      expr <- parseForm "(>= 3 3 5)"
       W.eval expr env `shouldBe` (env, Just (E $ Boolean False))
 
     it "eval function calls /square" $ do
