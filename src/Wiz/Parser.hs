@@ -27,6 +27,12 @@ closedParens = do
   void $ char ')'
   void spaces
 
+betweenParens p = do
+  void openParens
+  r <- try p
+  void closedParens
+  return r
+
 pBoolean :: Parser Expression
 pBoolean = do
   void spaces
@@ -78,53 +84,48 @@ pExpr = do
 
 pFormals :: Parser Formals
 pFormals = do
-  openParens
-  formals <- many pIdentifier
-  closedParens
-  return $ Formals formals
+  betweenParens $ do
+    formals <- many pIdentifier
+    return $ Formals formals
   where formals = []
 
 pIf :: Parser Expression
 pIf = do
-  openParens
-  void $ string "if"
-  void spaces
-  test <- pExpression
-  void spaces
-  consequent <- pExpression
-  void spaces
-  alternate <- pExpression
-  closedParens
-  return $ If test consequent alternate
+  betweenParens $ do
+    void $ string "if"
+    void spaces
+    test <- pExpression
+    void spaces
+    consequent <- pExpression
+    void spaces
+    alternate <- pExpression
+    return $ If test consequent alternate
 
 pList :: Parser Expression
 pList = do
-  openParens
-  exprs <- many pExpression
-  closedParens
-  return $ List exprs
+  betweenParens $ do
+    exprs <- many pExpression
+    return $ List exprs
 
 pSet :: Parser Expression
 pSet = do
-  openParens
-  void $ string "set!"
-  void spaces
-  name <- pIdentifier
-  void spaces
-  expr <- pExpression
-  void spaces
-  closedParens
-  return $ SetInstruction name expr
+  betweenParens $ do
+    void $ string "set!"
+    void spaces
+    name <- pIdentifier
+    void spaces
+    expr <- pExpression
+    void spaces
+    return $ SetInstruction name expr
 
 pLambda :: Parser Expression
 pLambda = do
-  openParens
-  void $ string "lambda"
-  void spaces
-  formals <- pFormals
-  expr <- pExpression
-  closedParens
-  return $ Lambda formals expr
+  betweenParens $ do
+    void $ string "lambda"
+    void spaces
+    formals <- pFormals
+    expr <- pExpression
+    return $ Lambda formals expr
 
 pIdentifier :: Parser String
 pIdentifier = do
@@ -149,14 +150,13 @@ pQuote = do
 
 pDefinition :: Parser Expression
 pDefinition = do
-  openParens
-  void $ string "define"
-  void spaces
-  name <- pIdentifier
-  void spaces
-  expr <- pExpression
-  closedParens
-  return $ Definition name expr
+  betweenParens $ do
+    void $ string "define"
+    void spaces
+    name <- pIdentifier
+    void spaces
+    expr <- pExpression
+    return $ Definition name expr
   
 pForm :: Parser Form
 pForm = try pExpr
