@@ -47,9 +47,9 @@ cdr (E (List (_:xs))) = List xs
 cdr (E (List [])) = List []
 cdr _ = error "cdr applied to non list expression!"
 
-cons :: Environment -> Expression -> Expression -> Expression
-cons env x (List []) = List [x]
-cons env x y = List [x, y]
+cons :: Environment -> Value -> Value -> Expression
+cons env (E x) (E (List [])) = List [x]
+cons env (E x) (E y) = List [x, y]
 
 nil :: Value -> Expression
 nil (E (List [])) = Boolean True
@@ -109,7 +109,7 @@ evalExpr env (List exprs@(x:xs)) =
         "pair?" -> E (pair (evalExpr env (head xs)))
         "car" -> E (car (evalExpr env (head xs)))
         "cdr" -> E (cdr (evalExpr env (head xs)))
-        "cons" -> E (cons env (head xs) (head (tail xs)))
+        "cons" -> E (cons env (evalExpr env (head xs)) (evalExpr env (head (tail xs))))
         "let" -> evalLet env (head xs) (last xs)
         _ -> apply env (envLookup symbol env) xs
     _ -> E (List exprs)

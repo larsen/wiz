@@ -92,6 +92,11 @@ spec = describe "main" $ do
       expr <- parseForm "(fact 10)"
       W.eval expr env `shouldBe` (env, Just (E $ Number 3628800))
 
+    it "eval recursive function calls /map" $ do
+      env <- loadProgram "init.scm"
+      expr <- parseForm "(map fact '(1 2 3))"
+      W.eval expr env `shouldBe` (env, Just (E $ List [Number 1, Number 2, Number 6]))
+
     it "eval another recursive function calls /length" $ do
       env <- loadProgram "init.scm"
       expr <- parseForm "(length '(1 2 3))"
