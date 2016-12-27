@@ -49,6 +49,7 @@ evalNum (E (Number n)) = n
 evalNum e = error $ "evalNum " ++ show e
 
 evalBool :: Value -> Bool
+-- evalBool v | trace ("evalBool " ++ show v) False = undefined
 evalBool (E (Boolean b)) = b
 evalBool e = error $ "evalBool " ++ show e
 
@@ -92,16 +93,15 @@ compareList _ [] = True
 compareList f list = and $ zipWith f list (tail list)
 
 evalExpr :: Environment -> Expression -> Value
- -- evalExpr env expr
- --  | trace ("evalExpr " ++ show expr) False = undefined
+-- evalExpr env expr
+--   | trace ("evalExpr " ++ show expr) False = undefined
 evalExpr env (Number n)                     = E $ Number n
 evalExpr env (Boolean b)                    = E $ Boolean b
 evalExpr env (Quote expression)             = E expression
 evalExpr env (Lambda formals body)          = C (Lambda formals body, env)
-evalExpr env (If test consequent alternate) = if evalBool $ evalExpr env test then
-                                                evalExpr env consequent
-                                              else evalExpr env alternate
-
+evalExpr env (Cond ((Clause test consequent):cls)) =
+  if evalBool $ evalExpr env test then evalExpr env consequent
+  else evalExpr env (Cond cls)
 evalExpr env (Symbol s) =
   case envLookup s env of
     E e -> evalExpr env e
@@ -133,7 +133,7 @@ evalExpr env (List exprs@(x:xs)) =
         "cons" -> E (cons env (evalExpr env (head xs)) (evalExpr env (head (tail xs))))
         "let" -> evalLet env (head xs) (last xs)
         _ -> apply env (envLookup symbol env) xs
-    _ -> E (List exprs)
+    _ -> E $ cons env (evalExpr env x) (E (List xs))
 
 symbolToString :: Expression -> String
 symbolToString (Symbol s) = s

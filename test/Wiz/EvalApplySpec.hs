@@ -139,9 +139,10 @@ spec = describe "main" $ do
       (snd $ W.eval expr env) `shouldBe` Just (E $ List [Number 1, Number 20, Number 30])
 
     it "eval set-cdr! (it preserves list length as calculated by length)" $ do
-      env <- loadProgram "test/set-cdr.scm" emptyEnv
+      env <- loadProgram "init.scm" emptyEnv
+      env' <- loadProgram "test/set-cdr.scm" env
       expr <- parseForm "(length list)"
-      (snd $ W.eval expr env) `shouldBe` Just (E $ Number 3)
+      (snd $ W.eval expr env') `shouldBe` Just (E $ Number 3)
 
     it "eval set-cdr!" $ do
       env <- loadProgram "test/set-cdr-2.scm" emptyEnv

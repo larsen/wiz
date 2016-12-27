@@ -72,7 +72,7 @@ pExpression =
   <|> try pSymbol
   <|> try pDefinition
   <|> try pQuote
-  <|> try pIf
+  <|> try pCond
   <|> try pLambda
   <|> try pSet
   <|> try pSetCar
@@ -90,16 +90,19 @@ pFormals = betweenParens $ do
     return $ Formals formals
   where formals = []
 
-pIf :: Parser Expression
-pIf = betweenParens $ do
-    void $ string "if"
-    void spaces
-    test <- pExpression
-    void spaces
-    consequent <- pExpression
-    void spaces
-    alternate <- pExpression
-    return $ If test consequent alternate
+pClause :: Parser Expression
+pClause = betweenParens $ do
+  test <- pExpression
+  void spaces
+  consequent <- pExpression
+  return $ Clause test consequent
+
+pCond :: Parser Expression
+pCond = betweenParens $ do
+  void $ string "cond"
+  void spaces
+  clauses <- many pClause
+  return $ Cond clauses
 
 pList :: Parser Expression
 pList = betweenParens $ do

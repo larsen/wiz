@@ -6,7 +6,8 @@ module Wiz.Types (
         Operator,
         Symbol,
         Quote,
-        If,
+        Cond,
+        Clause,
         Definition,
         Lambda,
         List,
@@ -28,7 +29,8 @@ data Expression = Number Integer
                 | Operator String
                 | Symbol String
                 | Quote Expression
-                | If Expression Expression Expression
+                | Cond [Expression]
+                | Clause Expression Expression
                 | Definition String Expression
                 | Lambda Formals Expression
                 | List [Expression]
@@ -44,8 +46,6 @@ instance Show Expression where
   show (Quote e) = show e
   show (List exprs) = "(" ++ L.unwords (map show exprs) ++ ")"
   show (Operator c) = show c
-  show (If test consequent alternate) =
-    "(if " ++ show test ++ " " ++ show consequent ++ " " ++ show alternate ++ ")"
   show (Definition sym expr) =
     "(define " ++ sym ++ " (" ++ show expr ++ "))"
   show (Lambda (Formals formals) expr) = "#PROCEDURE (λ (" ++ show expr ++ "))"

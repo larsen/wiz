@@ -13,13 +13,10 @@
 
 (define else '#t)
 
-(define cond
-  (lambda (lst)
-    (if (nil? lst)
-        '()
-        (if (car lst)
-            (car (cdr lst))
-            (cond (cdr lst))))))
+(define if
+  (lambda (test consequent alternate)
+    (cond (test consequent)
+          (else alternate))))
 
 (define length
   (lambda (lst)
