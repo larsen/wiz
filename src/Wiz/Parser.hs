@@ -197,7 +197,7 @@ loadProgram file env = do
       putStrLn "Error occurred parsing file."
       return env
     Right p -> do
-      putStrLn "Init file parsed correctly."
+      putStrLn (file ++ " parsed correctly.")
       return $ runProgram env p
   where
     runProgram env (Program (x:xs)) =
