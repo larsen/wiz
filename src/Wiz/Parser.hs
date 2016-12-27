@@ -184,23 +184,18 @@ pProgram = do
 
 -- test rule = parse rule "(source)"
 
--- TODO loadProgram dovrebbe ricevere
--- come parametro l'ambiente iniziale.
--- in questo modo dovrebbe essere piu` facile
--- implementare (load) come comando
-
-loadProgram :: String -> IO Environment
-loadProgram file = do
+loadProgram :: String -> Environment -> IO Environment
+loadProgram file env = do
   program <- readFile file
   putStrLn $ "Loading '" ++ file ++ "'"
   let res = parse pProgram "(source)" program
   case res of
     Left err -> do
       putStrLn "Error occurred parsing file."
-      return emptyEnv
+      return env
     Right p -> do
       putStrLn "Init file parsed correctly."
-      return $ runProgram emptyEnv p
+      return $ runProgram env p
   where
     runProgram env (Program (x:xs)) =
       let (env', res) = eval x env

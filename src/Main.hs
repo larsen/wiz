@@ -11,7 +11,7 @@ import System.Console.Haskeline
 
 main :: IO ()
 main = do
-   env <- loadProgram "init.scm"
+   env <- loadProgram "init.scm" emptyEnv
    runInputT defaultSettings (loop env)
    where
        loop :: Environment -> InputT IO ()
