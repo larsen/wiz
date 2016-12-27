@@ -69,8 +69,8 @@ cdr _ = error "cdr applied to non list expression!"
 cons :: Environment -> Value -> Value -> Expression
 -- cons env v1 v2
 --   | trace ("cons " ++ show v1 ++ ", " ++ show v2) False = undefined
-cons env (E x) (E (List (ys))) = List $ x:ys
-cons env (E x) (E e) = List $ [x,e]
+cons env (E x) (E (List ys)) = List $ x:ys
+cons env (E x) (E e) = List [x,e]
 
 nil :: Value -> Expression
 nil (E (List [])) = Boolean True
