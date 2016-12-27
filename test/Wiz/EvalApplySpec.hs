@@ -122,6 +122,12 @@ spec = describe "main" $ do
       expr <- parseForm "(m 10)"
       W.eval expr env `shouldBe` (env, Just (E $ Number 20))
 
+    it "count change example" $ do
+      env <- loadProgram "init.scm" emptyEnv
+      env' <- loadProgram "test/count-change.scm" env
+      expr <- parseForm "(count-change 100)"
+      W.eval expr env' `shouldBe` (env', Just (E $ Number 292))
+
   describe "set! instructions" $ do
     it "eval set!" $ do
       env <- loadProgram "test/set.scm" emptyEnv
