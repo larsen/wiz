@@ -75,6 +75,8 @@ pExpression =
   <|> try pIf
   <|> try pLambda
   <|> try pSet
+  <|> try pSetCar
+  <|> try pSetCdr
   <|> try pList
 
 pExpr :: Parser Form
@@ -117,6 +119,28 @@ pSet = do
     expr <- pExpression
     void spaces
     return $ SetInstruction name expr
+
+pSetCar :: Parser Expression
+pSetCar = do
+  betweenParens $ do
+    void $ string "set-car!"
+    void spaces
+    name <- pIdentifier
+    void spaces
+    expr <- pExpression
+    void spaces
+    return $ SetCarInstruction name expr
+
+pSetCdr :: Parser Expression
+pSetCdr = do
+  betweenParens $ do
+    void $ string "set-cdr!"
+    void spaces
+    name <- pIdentifier
+    void spaces
+    expr <- pExpression
+    void spaces
+    return $ SetCdrInstruction name expr
 
 pLambda :: Parser Expression
 pLambda = do
@@ -167,6 +191,11 @@ pProgram = do
   return $ Program forms
 
 -- test rule = parse rule "(source)"
+
+-- TODO loadProgram dovrebbe ricevere
+-- come parametro l'ambiente iniziale.
+-- in questo modo dovrebbe essere piu` facile
+-- implementare (load) come comando
 
 loadProgram :: String -> IO Environment
 loadProgram file = do

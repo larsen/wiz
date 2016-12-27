@@ -14,12 +14,31 @@ eval (FExpr (Definition sym expr)) env =
   (evalDefinition (E (Definition sym expr)) env, Nothing)
 eval (FExpr (SetInstruction symbol expr)) env =
   (evalSetInstruction symbol expr env, Nothing)
+eval (FExpr (SetCarInstruction symbol expr)) env =
+  (evalSetCarInstruction symbol expr env, Nothing)
+eval (FExpr (SetCdrInstruction symbol expr)) env =
+  (evalSetCdrInstruction symbol expr env, Nothing)
 eval (FExpr expr) env = (env, Just $ evalExpr env expr)
 
 -- TODO refactor
 evalSetInstruction :: String -> Expression -> Environment -> Environment
 evalSetInstruction symbol expr env =
   changeValue env symbol (evalExpr env expr)
+
+evalSetCarInstruction :: String -> Expression -> Environment -> Environment
+evalSetCarInstruction symbol expr env =
+  case symbolValue of
+    (E (List (x:xs))) -> changeValue env symbol (E $ List (expr:xs))
+    _ -> error "set-car! applied to non-list value"
+  where symbolValue = envLookup symbol env
+
+evalSetCdrInstruction :: String -> Expression -> Environment -> Environment
+evalSetCdrInstruction symbol expr env =
+  case symbolValue of
+    (E (List (x:xs))) -> changeValue env symbol $
+      evalExpr env (cons env (E x) (evalExpr env expr))
+    _ -> error "set-cdr! applied to non-list value"
+  where symbolValue = envLookup symbol env
 
 evalDefinition :: Value -> Environment -> Environment
 evalDefinition (E (Definition symbol expr)) env =
@@ -48,8 +67,10 @@ cdr (E (List [])) = List []
 cdr _ = error "cdr applied to non list expression!"
 
 cons :: Environment -> Value -> Value -> Expression
-cons env (E x) (E (List [])) = List [x]
-cons env (E x) (E y) = List [x, y]
+-- cons env v1 v2
+--   | trace ("cons " ++ show v1 ++ ", " ++ show v2) False = undefined
+cons env (E x) (E (List (ys))) = List $ x:ys
+cons env (E x) (E e) = List $ [x,e]
 
 nil :: Value -> Expression
 nil (E (List [])) = Boolean True
@@ -71,8 +92,8 @@ compareList _ [] = True
 compareList f list = and $ zipWith f list (tail list)
 
 evalExpr :: Environment -> Expression -> Value
--- evalExpr env expr
---   | trace ("evalExpr " ++ show expr ++ " in\n" ++ show env) False = undefined
+ -- evalExpr env expr
+ --  | trace ("evalExpr " ++ show expr) False = undefined
 evalExpr env (Number n)                     = E $ Number n
 evalExpr env (Boolean b)                    = E $ Boolean b
 evalExpr env (Quote expression)             = E expression

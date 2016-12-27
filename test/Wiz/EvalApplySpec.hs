@@ -95,7 +95,7 @@ spec = describe "main" $ do
     it "eval recursive function calls /map" $ do
       env <- loadProgram "init.scm"
       expr <- parseForm "(map fact '(1 2 3))"
-      W.eval expr env `shouldBe` (env, Just (E $ List [Number 1, Number 2, Number 6]))
+      (snd $ W.eval expr env) `shouldBe` Just (E $ List [Number 1, Number 2, Number 6])
 
     it "eval another recursive function calls /length" $ do
       env <- loadProgram "init.scm"
@@ -122,8 +122,28 @@ spec = describe "main" $ do
       expr <- parseForm "(m 10)"
       W.eval expr env `shouldBe` (env, Just (E $ Number 20))
 
-  describe "set!" $ do
+  describe "set! instructions" $ do
     it "eval set!" $ do
       env <- loadProgram "test/set.scm"
       expr <- parseForm "a"
       W.eval expr env `shouldBe` (env, Just (E $ Number 20))
+
+    it "eval set-car!" $ do
+      env <- loadProgram "test/set-car.scm"
+      expr <- parseForm "list"
+      W.eval expr env `shouldBe` (env, Just (E $ List [Number 2, Number 2, Number 3]))
+
+    it "eval set-cdr!" $ do
+      env <- loadProgram "test/set-cdr.scm"
+      expr <- parseForm "list"
+      (snd $ W.eval expr env) `shouldBe` Just (E $ List [Number 1, Number 20, Number 30])
+
+    it "eval set-cdr! (it preserves list length as calculated by length)" $ do
+      env <- loadProgram "test/set-cdr.scm"
+      expr <- parseForm "(length list)"
+      (snd $ W.eval expr env) `shouldBe` Just (E $ Number 3)
+
+    it "eval set-cdr!" $ do
+      env <- loadProgram "test/set-cdr-2.scm"
+      expr <- parseForm "list"
+      (snd $ W.eval expr env) `shouldBe` Just (E $ List [Number 1, Number 20])

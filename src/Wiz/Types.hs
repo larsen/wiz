@@ -10,7 +10,9 @@ module Wiz.Types (
         Definition,
         Lambda,
         List,
-        SetInstruction ),
+        SetInstruction,
+        SetCarInstruction,
+        SetCdrInstruction),
     Form (FExpr),
     Program (Program),
   ) where
@@ -31,6 +33,8 @@ data Expression = Number Integer
                 | Lambda Formals Expression
                 | List [Expression]
                 | SetInstruction String Expression
+                | SetCarInstruction String Expression
+                | SetCdrInstruction String Expression
                   deriving (Eq, Ord)
 
 instance Show Expression where
