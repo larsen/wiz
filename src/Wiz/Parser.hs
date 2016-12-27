@@ -85,15 +85,13 @@ pExpr = do
   return $ FExpr expr
 
 pFormals :: Parser Formals
-pFormals = do
-  betweenParens $ do
+pFormals = betweenParens $ do
     formals <- many pIdentifier
     return $ Formals formals
   where formals = []
 
 pIf :: Parser Expression
-pIf = do
-  betweenParens $ do
+pIf = betweenParens $ do
     void $ string "if"
     void spaces
     test <- pExpression
@@ -104,14 +102,12 @@ pIf = do
     return $ If test consequent alternate
 
 pList :: Parser Expression
-pList = do
-  betweenParens $ do
+pList = betweenParens $ do
     exprs <- many pExpression
     return $ List exprs
 
 pSet :: Parser Expression
-pSet = do
-  betweenParens $ do
+pSet = betweenParens $ do
     void $ string "set!"
     void spaces
     name <- pIdentifier
@@ -121,8 +117,7 @@ pSet = do
     return $ SetInstruction name expr
 
 pSetCar :: Parser Expression
-pSetCar = do
-  betweenParens $ do
+pSetCar = betweenParens $ do
     void $ string "set-car!"
     void spaces
     name <- pIdentifier
@@ -132,8 +127,7 @@ pSetCar = do
     return $ SetCarInstruction name expr
 
 pSetCdr :: Parser Expression
-pSetCdr = do
-  betweenParens $ do
+pSetCdr = betweenParens $ do
     void $ string "set-cdr!"
     void spaces
     name <- pIdentifier
@@ -143,8 +137,7 @@ pSetCdr = do
     return $ SetCdrInstruction name expr
 
 pLambda :: Parser Expression
-pLambda = do
-  betweenParens $ do
+pLambda = betweenParens $ do
     void $ string "lambda"
     void spaces
     formals <- pFormals
@@ -173,8 +166,7 @@ pQuote = do
   return $ Quote expr
 
 pDefinition :: Parser Expression
-pDefinition = do
-  betweenParens $ do
+pDefinition = betweenParens $ do
     void $ string "define"
     void spaces
     name <- pIdentifier
