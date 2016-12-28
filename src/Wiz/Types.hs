@@ -5,6 +5,7 @@ module Wiz.Types (
         Boolean,
         Operator,
         Symbol,
+        String,
         Quote,
         Cond,
         Clause,
@@ -28,6 +29,7 @@ data Expression = Number Integer
                 | Boolean Bool
                 | Operator String
                 | Symbol String
+                | String String
                 | Quote Expression
                 | Cond [Expression]
                 | Clause Expression Expression
@@ -41,6 +43,7 @@ data Expression = Number Integer
 
 instance Show Expression where
   show (Number n) = show n
+  show (String s) = show s
   show (Boolean b) = if b then "#t" else "#f"
   show (Symbol s) = show s
   show (Quote e) = show e

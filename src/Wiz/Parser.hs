@@ -67,6 +67,7 @@ pOperator = do
 pExpression :: Parser Expression
 pExpression =
   try pNumber
+  <|> try pString
   <|> try pBoolean
   <|> try pOperator
   <|> try pSymbol
@@ -146,6 +147,13 @@ pLambda = betweenParens $ do
     formals <- pFormals
     expr <- pExpression
     return $ Lambda formals expr
+
+pString :: Parser Expression
+pString = do
+  void $ char '"'
+  string <- many (noneOf "\"")
+  void $ char '"'
+  return $ String string
 
 pIdentifier :: Parser String
 pIdentifier = do
