@@ -8,26 +8,29 @@ import Wiz.EvalApply
 import Text.Parsec (parse)
 import Text.Printf
 import System.Console.Haskeline
+import Data.Maybe (fromMaybe)
+import Control.Monad (liftM)
 
 main :: IO ()
 main = do
-   env <- loadProgram "init.scm" emptyEnv
+   prg <- loadProgram "init.scm"
+   env <- return $ runProgram emptyEnv $ fromMaybe (Program []) prg
    runInputT defaultSettings (loop env)
    where
-       loop :: Environment -> InputT IO ()
-       loop env = do
-           input <- getInputLine "λ> "
-           case input of
-               Nothing -> return ()
-               Just input -> do
-                 let res = parse pForm "(source)" input
-                 case res of
-                   Left err -> do
-                     outputStrLn "Error!"
-                     loop env
-                   Right form -> do
-                     let (env', result) = eval form env
-                     case result of
-                       Just result -> outputStrLn $ printf "%s" (show result)
-                       Nothing     -> outputStrLn $ printf "\n"
-                     loop env'
+     loop :: Environment -> InputT IO ()
+     loop env = do
+         input <- getInputLine "λ> "
+         case input of
+             Nothing -> return ()
+             Just input -> do
+               let res = parse pForm "(source)" input
+               case res of
+                 Left err -> do
+                   outputStrLn "Error!"
+                   loop env
+                 Right form -> do
+                   let (env', result) = eval form env
+                   case result of
+                     Just result -> outputStrLn $ printf "%s" (show result)
+                     Nothing     -> outputStrLn $ printf "\n"
+                   loop env'

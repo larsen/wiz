@@ -6,7 +6,7 @@ module Wiz.Parser (
 
 import Wiz.Types
 import Wiz.Environment
-import Wiz.EvalApply
+-- import Wiz.EvalApply
 import Text.Parsec.Char (spaces)
 import Text.Parsec.String (Parser)
 import Text.Parsec.Token (parens)
@@ -187,22 +187,15 @@ pProgram = do
 
 -- test rule = parse rule "(source)"
 
-loadProgram :: String -> Environment -> IO Environment
-loadProgram file env = do
-  program <- readFile file
+loadProgram :: String -> IO (Maybe Program)
+loadProgram file = do
   putStrLn $ "Loading '" ++ file ++ "'"
+  program <- readFile file
   let res = parse pProgram "(source)" program
   case res of
     Left err -> do
       putStrLn "Error occurred parsing file."
-      return env
+      return Nothing
     Right p -> do
       putStrLn (file ++ " parsed correctly.")
-      return $ runProgram env p
-  where
-    runProgram env (Program (x:xs)) =
-      let (env', res) = eval x env
-      in case res of
-        Just res -> runProgram env' (Program xs)
-        Nothing  -> runProgram env' (Program xs) -- ???
-    runProgram env (Program []) = env
+      return $ Just p

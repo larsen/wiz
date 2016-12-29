@@ -1,5 +1,6 @@
 module Wiz.EvalApply (
-    eval
+    eval,
+    runProgram
   ) where
 
 import Wiz.Types
@@ -8,6 +9,14 @@ import qualified Data.Map as Map
 import Data.Maybe
 import Text.Printf
 import Debug.Trace
+
+runProgram :: Environment -> Program -> Environment
+runProgram env (Program (x:xs)) =
+  let (env', res) = eval x env
+  in case res of
+       Just res -> runProgram env' (Program xs)
+       Nothing  -> runProgram env' (Program xs) -- ???
+runProgram env (Program []) = env
 
 eval :: Form -> Environment -> (Environment, Maybe Value)
 eval (FExpr (Definition sym expr)) env =
