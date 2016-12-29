@@ -32,8 +32,9 @@ eval (FExpr (List [(Symbol "load"), (String file)])) env = do
   prg <- loadProgram file
   env' <- runProgram env $ fromMaybe (Program []) prg
   return (env', Nothing)
-eval (FExpr (List [(Symbol "display"), (String message)])) env = do
-  printf "%s\n" message
+eval (FExpr (List [(Symbol "display"), expr])) env = do
+  result <- return $ evalExpr env expr
+  printf "%s\n" $ show result
   return (env, Nothing)
 eval (FExpr expr) env = return $ (env, Just $ evalExpr env expr)
 
