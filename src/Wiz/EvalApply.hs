@@ -28,7 +28,7 @@ eval (FExpr (SetCarInstruction symbol expr)) env =
   return $ (evalSetCarInstruction symbol expr env, Nothing)
 eval (FExpr (SetCdrInstruction symbol expr)) env =
   return $ (evalSetCdrInstruction symbol expr env, Nothing)
-eval (FExpr (List [(Symbol "load"), (Symbol file)])) env = do
+eval (FExpr (List [(Symbol "load"), (String file)])) env = do
   prg <- loadProgram file
   env' <- runProgram env $ fromMaybe (Program []) prg
   return (env', Nothing)
