@@ -110,6 +110,7 @@ evalExpr :: Environment -> Expression -> Value
 -- evalExpr env expr
 --   | trace ("evalExpr " ++ show expr) False = undefined
 evalExpr env (Number n)                     = E $ Number n
+evalExpr env (String s)                     = E $ String s
 evalExpr env (Boolean b)                    = E $ Boolean b
 evalExpr env (Quote expression)             = E expression
 evalExpr env (Lambda formals body)          = C (Lambda formals body, env)
