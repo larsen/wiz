@@ -5,29 +5,31 @@ module Wiz.EvalApply (
 
 import Wiz.Types
 import Wiz.Environment
+import Wiz.Parser
 import qualified Data.Map as Map
 import Data.Maybe
 import Text.Printf
 import Debug.Trace
 
-runProgram :: Environment -> Program -> Environment
-runProgram env (Program (x:xs)) =
-  let (env', res) = eval x env
-  in case res of
-       Just res -> runProgram env' (Program xs)
-       Nothing  -> runProgram env' (Program xs) -- ???
-runProgram env (Program []) = env
+runProgram :: Environment -> Program -> IO Environment
+runProgram env (Program (x:xs)) = do
+  (env', res) <- eval x env
+  case res of
+    Just res -> runProgram env' (Program xs)
+    Nothing  -> runProgram env' (Program xs) -- ???
+runProgram env (Program []) = return env
 
-eval :: Form -> Environment -> (Environment, Maybe Value)
+eval :: Form -> Environment -> IO (Environment, Maybe Value)
 eval (FExpr (Definition sym expr)) env =
-  (evalDefinition (E (Definition sym expr)) env, Nothing)
+  return $ (evalDefinition (E (Definition sym expr)) env, Nothing)
 eval (FExpr (SetInstruction symbol expr)) env =
-  (evalSetInstruction symbol expr env, Nothing)
+  return $ (evalSetInstruction symbol expr env, Nothing)
 eval (FExpr (SetCarInstruction symbol expr)) env =
-  (evalSetCarInstruction symbol expr env, Nothing)
+  return $ (evalSetCarInstruction symbol expr env, Nothing)
 eval (FExpr (SetCdrInstruction symbol expr)) env =
-  (evalSetCdrInstruction symbol expr env, Nothing)
-eval (FExpr expr) env = (env, Just $ evalExpr env expr)
+  return $ (evalSetCdrInstruction symbol expr env, Nothing)
+eval (FExpr (List [(Symbol "load"), (Symbol file)])) env = undefined
+eval (FExpr expr) env = return $ (env, Just $ evalExpr env expr)
 
 -- TODO refactor
 evalSetInstruction :: String -> Expression -> Environment -> Environment

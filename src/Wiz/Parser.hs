@@ -6,7 +6,6 @@ module Wiz.Parser (
 
 import Wiz.Types
 import Wiz.Environment
--- import Wiz.EvalApply
 import Text.Parsec.Char (spaces)
 import Text.Parsec.String (Parser)
 import Text.Parsec.Token (parens)
