@@ -54,6 +54,7 @@ pOperator :: Parser Expression
 pOperator = do
   o <- choice [ try (string "+")
               , try (string "*")
+              , try (string "/")
               , try (string "-")
               , try (string ">=")
               , try (string "<=")

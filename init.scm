@@ -24,6 +24,12 @@
         0
         (+ 1 (length (cdr lst))))))
 
+(define abs
+  (lambda (x)
+    (if (< x 0)
+        (* x (- 1 2))
+        x)))
+
 (define add1
   (let ((one 1))
     (lambda (addend)

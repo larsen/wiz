@@ -25,7 +25,7 @@ import qualified Data.Map as Map
 data Formals = Formals [String]
   deriving (Eq, Show, Ord)
 
-data Expression = Number Integer
+data Expression = Number Double
                 | Boolean Bool
                 | Operator String
                 | Symbol String

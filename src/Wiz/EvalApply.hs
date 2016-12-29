@@ -62,7 +62,7 @@ evalDefinition :: Value -> Environment -> Environment
 evalDefinition (E (Definition symbol expr)) env =
   changeValue env symbol (evalExpr env expr)
 
-evalNum :: Value -> Integer
+evalNum :: Value -> Double
 evalNum (E (Number n)) = n
 evalNum e = error $ "evalNum " ++ show e
 
@@ -134,6 +134,9 @@ evalExpr env (List exprs@(x:xs)) =
     Operator "<=" -> E (Boolean $ compareList (<=) (map (evalNum . evalExpr env) xs))
     Operator ">=" -> E (Boolean $ compareList (>=) (map (evalNum . evalExpr env) xs))
     Operator "*" -> E (Number (product (map (evalNum . evalExpr env) xs)))
+    Operator "/" -> E (Number $ dividend / divisor)
+                    where dividend = evalNum $ evalExpr env (head xs)
+                          divisor = evalNum $ evalExpr env (head (tail xs))
     Operator "+" -> E (Number (sum (map (evalNum . evalExpr env) xs)))
     Operator "-" -> E (Number (foldl (-)
                                (evalNum $ evalExpr env (head xs))
