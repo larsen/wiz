@@ -172,7 +172,7 @@ spec = describe "main" $ do
       env <- W.runProgram emptyEnv $ fromMaybe (Program []) prg
       expr <- parseForm "list"
       results <- W.eval expr env
-      (snd results) `shouldBe` Just (E $ List [Number 1, Number 20, Number 30])
+      snd results `shouldBe` Just (E $ List [Number 1, Number 20, Number 30])
 
     it "eval set-cdr! (it preserves list length as calculated by length)" $ do
       prg <- loadProgram "init.scm"
@@ -181,11 +181,11 @@ spec = describe "main" $ do
       env' <- W.runProgram env $ fromMaybe (Program []) prg'
       expr <- parseForm "(length list)"
       results <- W.eval expr env'
-      (snd results) `shouldBe` Just (E $ Number 3)
+      snd results `shouldBe` Just (E $ Number 3)
 
     it "eval set-cdr!" $ do
       prg <- loadProgram "test/set-cdr-2.scm"
       env <- W.runProgram emptyEnv $ fromMaybe (Program []) prg
       expr <- parseForm "list"
       results <- W.eval expr env
-      (snd results) `shouldBe` Just (E $ List [Number 1, Number 20])
+      snd results `shouldBe` Just (E $ List [Number 1, Number 20])

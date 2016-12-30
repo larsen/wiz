@@ -21,22 +21,22 @@ runProgram env (Program []) = return env
 
 eval :: Form -> Environment -> IO (Environment, Maybe Value)
 eval (FExpr (Definition sym expr)) env =
-  return $ (evalDefinition (E (Definition sym expr)) env, Nothing)
+  return (evalDefinition (E (Definition sym expr)) env, Nothing)
 eval (FExpr (SetInstruction symbol expr)) env =
-  return $ (evalSetInstruction symbol expr env, Nothing)
+  return (evalSetInstruction symbol expr env, Nothing)
 eval (FExpr (SetCarInstruction symbol expr)) env =
-  return $ (evalSetCarInstruction symbol expr env, Nothing)
+  return (evalSetCarInstruction symbol expr env, Nothing)
 eval (FExpr (SetCdrInstruction symbol expr)) env =
-  return $ (evalSetCdrInstruction symbol expr env, Nothing)
-eval (FExpr (List [(Symbol "load"), (String file)])) env = do
+  return (evalSetCdrInstruction symbol expr env, Nothing)
+eval (FExpr (List [Symbol "load", String file])) env = do
   prg <- loadProgram file
   env' <- runProgram env $ fromMaybe (Program []) prg
   return (env', Nothing)
-eval (FExpr (List [(Symbol "display"), expr])) env = do
+eval (FExpr (List [Symbol "display", expr])) env = do
   result <- return $ evalExpr env expr
   printf "%s\n" $ show result
   return (env, Nothing)
-eval (FExpr expr) env = return $ (env, Just $ evalExpr env expr)
+eval (FExpr expr) env = return (env, Just $ evalExpr env expr)
 
 -- TODO refactor
 evalSetInstruction :: String -> Expression -> Environment -> Environment
@@ -118,7 +118,7 @@ evalExpr env (String s)                     = E $ String s
 evalExpr env (Boolean b)                    = E $ Boolean b
 evalExpr env (Quote expression)             = E expression
 evalExpr env (Lambda formals body)          = C (Lambda formals body, env)
-evalExpr env (Cond ((Clause test consequent):cls)) =
+evalExpr env (Cond (Clause test consequent:cls)) =
   if evalBool $ evalExpr env test then evalExpr env consequent
   else evalExpr env (Cond cls)
 evalExpr env (Symbol s) =
