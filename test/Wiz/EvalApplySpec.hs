@@ -66,80 +66,80 @@ spec = describe "main" $ do
         "1"
         (Just (E $ Number 1))
 
-    it "eval simple arithmetic operations" $ do
+    it "eval simple arithmetic operations" $
       testForm
         "init.scm"
         "(+ 2 2)"
         (Just (E $ Number 4))
     
 
-    it "eval simple comparison operator" $ do
+    it "eval simple comparison operator" $
       testForm
         "init.scm"
         "(< 1 2)"
         (Just (E $ Boolean True))
 
-    it "eval simple comparison operator /2" $ do
+    it "eval simple comparison operator /2" $
       testForm
         "init.scm"
         "(> 1 2)"
         (Just (E $ Boolean False))
 
-    it "eval simple comparison operator /3" $ do
+    it "eval simple comparison operator /3" $
       testForm
         "init.scm"
         "(> 3 2 5)"
         (Just (E $ Boolean False))
 
-    it "eval simple comparison operator /3" $ do
+    it "eval simple comparison operator /3" $
       testForm
         "init.scm"
         "(> 3 3 5)"
         (Just (E $ Boolean False))
 
-    it "eval function calls /square" $ do
+    it "eval function calls /square" $
       testForm
         "test/square.scm"
         "(square 10)"
         (Just (E $ Number 100))
 
-    it "eval recursive function calls /fact" $ do
+    it "eval recursive function calls /fact" $
       testForm
         "init.scm"
         "(fact 10)"
         (Just (E $ Number 3628800))
 
-    it "eval recursive function calls /map" $ do
+    it "eval recursive function calls /map" $
       testForm
         "init.scm"
         "(map fact '(1 2 3))"
         (Just (E $ List [Number 1, Number 2, Number 6]))
 
-    it "eval another recursive function calls /length" $ do
+    it "eval another recursive function calls /length" $
       testForm
         "init.scm"
         "(length '(1 2 3))"
         (Just (E $ Number 3))
 
-    it "eval (let) form" $ do
+    it "eval (let) form" $
       testForm
         "init.scm"
         "(let ((a 10) (b 20)) a)"
         (Just (E $ Number 10))
 
-    it "eval (let) form /2" $ do
+    it "eval (let) form /2" $
       testForm
         "init.scm"
         "(let ((a 10) (b 20)) (+ a b))"
         (Just (E $ Number 30))
 
-    it "eval closure form" $ do
+    it "eval closure form" $
       testForm
         "init.scm"
         "(add1 10)"
         (Just (E $ Number 11))
 
-    it "procedure returning closure" $ do
+    it "procedure returning closure" $
        testForm
         "test/closure.scm"
         "(m 10)"
@@ -155,13 +155,13 @@ spec = describe "main" $ do
       results `shouldBe` (env', Just (E $ Number 292))
 
   describe "set! instructions" $ do
-    it "eval set!" $ do
+    it "eval set!" $
       testForm
         "test/set.scm"
         "a"
         (Just (E $ Number 20))
 
-    it "eval set-car!" $ do
+    it "eval set-car!" $
       testForm
         "test/set-car.scm"
         "list"
