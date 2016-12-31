@@ -110,34 +110,31 @@ pList = betweenParens $ do
     exprs <- many pExpression
     return $ List exprs
 
+pIdentifierAndExpression :: Parser (String, Expression)
+pIdentifierAndExpression = do
+  void spaces
+  name <- pIdentifier
+  void spaces
+  expr <- pExpression
+  void spaces
+  return (name, expr)
+
 pSet :: Parser Expression
 pSet = betweenParens $ do
     void $ string "set!"
-    void spaces
-    name <- pIdentifier
-    void spaces
-    expr <- pExpression
-    void spaces
+    (name, expr) <- pIdentifierAndExpression
     return $ SetInstruction name expr
 
 pSetCar :: Parser Expression
 pSetCar = betweenParens $ do
     void $ string "set-car!"
-    void spaces
-    name <- pIdentifier
-    void spaces
-    expr <- pExpression
-    void spaces
+    (name, expr) <- pIdentifierAndExpression
     return $ SetCarInstruction name expr
 
 pSetCdr :: Parser Expression
 pSetCdr = betweenParens $ do
     void $ string "set-cdr!"
-    void spaces
-    name <- pIdentifier
-    void spaces
-    expr <- pExpression
-    void spaces
+    (name, expr) <- pIdentifierAndExpression
     return $ SetCdrInstruction name expr
 
 pLambda :: Parser Expression
@@ -178,12 +175,9 @@ pQuote = do
 
 pDefinition :: Parser Expression
 pDefinition = betweenParens $ do
-    void $ string "define"
-    void spaces
-    name <- pIdentifier
-    void spaces
-    expr <- pExpression
-    return $ Definition name expr
+  void $ string "define"
+  (name, expr) <- pIdentifierAndExpression
+  return $ Definition name expr
   
 pForm :: Parser Form
 pForm = try pExpr
