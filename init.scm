@@ -36,3 +36,10 @@
   (let ((one 1))
     (lambda (addend)
       (+ one addend))))
+
+(define remainder
+  (lambda (a b)
+    (if (< (- a b) 0)
+        a
+        (remainder (- a b) b))))
+    
