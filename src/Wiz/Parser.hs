@@ -9,7 +9,7 @@ import Wiz.Environment
 import Text.Parsec.Char (space, spaces)
 import Text.Parsec.String (Parser)
 import Text.Parsec.Token (parens)
-import Text.Parsec (ParseError, anyChar, endOfLine, parse, char, digit, string, oneOf, noneOf, try, sepBy, (<|>))
+import Text.Parsec (ParseError, anyChar, endOfLine, parse, char, digit, string, noneOf, try, sepBy, (<|>))
 import Text.Parsec.Combinator (choice, many1, manyTill)
 import Control.Applicative (many)
 import Control.Monad (void)
