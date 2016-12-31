@@ -6,25 +6,32 @@ module Wiz.Parser (
 
 import Wiz.Types
 import Wiz.Environment
-import Text.Parsec.Char (spaces)
+import Text.Parsec.Char (space, spaces)
 import Text.Parsec.String (Parser)
 import Text.Parsec.Token (parens)
-import Text.Parsec (ParseError, parse, char, digit, string, oneOf, noneOf, try, (<|>))
+import Text.Parsec (ParseError, anyChar, endOfLine, parse, char, digit, string, oneOf, noneOf, try, sepBy, (<|>))
 import Text.Parsec.Combinator (choice, many1, manyTill)
 import Control.Applicative (many)
 import Control.Monad (void)
 
 -- Parser
 
-openParens = do
-  void spaces
-  void $ char '('
-  void spaces
+separator :: Parser ()
+separator = do
+  void $ try comment <|> try spaces
+  return ()
 
+openParens :: Parser ()
+openParens = do
+  void separator
+  void $ char '('
+  void separator
+
+closedParens :: Parser ()
 closedParens = do
-  void spaces
+  void separator
   void $ char ')'
-  void spaces
+  void separator
 
 betweenParens p = do
   void openParens
@@ -32,9 +39,14 @@ betweenParens p = do
   void closedParens
   return r
 
+comment :: Parser ()
+comment = do
+  void $ char ';'
+  void $ manyTill anyChar endOfLine
+
 pBoolean :: Parser Expression
 pBoolean = do
-  void spaces
+  void separator
   try (do
     string "#t"
     return (Boolean True))
@@ -45,9 +57,9 @@ pBoolean = do
 
 pNumber :: Parser Expression
 pNumber = do
-  void spaces
+  void separator
   n <- many1 digit
-  void spaces
+  void separator
   return $ Number (read n)
 
 pOperator :: Parser Expression
@@ -60,7 +72,7 @@ pOperator = do
               , try (string "<=")
               , try (string ">")
               , try (string "<") ]
-  void spaces
+  void separator
   return $ Operator o
 
 -- Il problema e` nelle seguenti due definizioni
@@ -94,14 +106,14 @@ pFormals = betweenParens $ do
 pClause :: Parser Expression
 pClause = betweenParens $ do
   test <- pExpression
-  void spaces
+  void separator
   consequent <- pExpression
   return $ Clause test consequent
 
 pCond :: Parser Expression
 pCond = betweenParens $ do
   void $ string "cond"
-  void spaces
+  void separator
   clauses <- many pClause
   return $ Cond clauses
 
@@ -112,11 +124,11 @@ pList = betweenParens $ do
 
 pIdentifierAndExpression :: Parser (String, Expression)
 pIdentifierAndExpression = do
-  void spaces
+  void separator
   name <- pIdentifier
-  void spaces
+  void separator
   expr <- pExpression
-  void spaces
+  void separator
   return (name, expr)
 
 pSet :: Parser Expression
@@ -140,7 +152,7 @@ pSetCdr = betweenParens $ do
 pLambda :: Parser Expression
 pLambda = betweenParens $ do
     void $ string "lambda"
-    void spaces
+    void separator
     formals <- pFormals
     expr <- pExpression
     return $ Lambda formals expr
@@ -154,21 +166,21 @@ pString = do
 
 pIdentifier :: Parser String
 pIdentifier = do
-  void spaces
+  void separator
   name <- many1 (noneOf " '()\n\t")
-  void spaces
+  void separator
   return name
 
 pSymbol :: Parser Expression
 pSymbol = do
-  void spaces
+  void separator
   name <- many1 (noneOf " '()\n\t")
-  void spaces
+  void separator
   return $ Symbol name
 
 pQuote :: Parser Expression
 pQuote = do
-  void spaces
+  void separator
   void $ char '\''
   expr <- pExpression
   return $ Quote expr
@@ -184,7 +196,8 @@ pForm = try pExpr
 
 pProgram :: Parser Program
 pProgram = do
-  forms <- many pForm
+  void $ separator
+  forms <- sepBy pForm separator
   return $ Program forms
 
 -- test rule = parse rule "(source)"

@@ -19,7 +19,10 @@
 
 (define good-enough?
   (lambda (guess x)
-    (< (abs (- (square guess) x)) (/ 1 1000))))
+    (< (abs (- (square guess) x))
+       ;; until we implement proper parsing
+       ;; for rational constants
+       (/ 1 1000))))
 
 (define sqrt
   (lambda (x)

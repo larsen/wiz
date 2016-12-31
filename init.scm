@@ -1,3 +1,5 @@
+;; collection of functions
+
 (define fact
   (lambda (n)
     (if (= n 0)
