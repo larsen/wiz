@@ -8,7 +8,7 @@
 
 (define map
   (lambda (f lst)
-    (if (nil? lst)
+    (if (null? lst)
         '()
         (cons (f (car lst))
               (map f (cdr lst))))))
@@ -22,7 +22,7 @@
 
 (define length
   (lambda (lst)
-    (if (nil? lst)
+    (if (null? lst)
         0
         (+ 1 (length (cdr lst))))))
 

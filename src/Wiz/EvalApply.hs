@@ -148,7 +148,7 @@ evalExpr env (List exprs@(x:xs)) =
                    (evalExpr env (head (tail xs))))
         "or" -> E (Wiz.EvalApply.or (map (evalExpr env) xs))
         "not" -> E (Wiz.EvalApply.not (evalExpr env (head xs)))
-        "nil?" -> E (nil (evalExpr env (head xs)))
+        "null?" -> E (nil (evalExpr env (head xs)))
         "pair?" -> E (pair (evalExpr env (head xs)))
         "car" -> E (car (evalExpr env (head xs)))
         "cdr" -> E (cdr (evalExpr env (head xs)))

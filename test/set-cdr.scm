@@ -2,7 +2,7 @@
 
 (define length
   (lambda (lst)
-    (if (nil? lst)
+    (if (null? lst)
         0
         (+ 1 (length (cdr lst))))))
 
