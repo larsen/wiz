@@ -54,7 +54,7 @@ evalSetCdrInstruction :: String -> Expression -> Environment -> Environment
 evalSetCdrInstruction symbol expr env =
   case symbolValue of
     (E (List (x:xs))) -> changeValue env symbol $
-      evalExpr env (cons env (E x) (evalExpr env expr))
+      evalExpr env (cons (E x) (evalExpr env expr))
     _ -> error "set-cdr! applied to non-list value"
   where symbolValue = envLookup symbol env
 
@@ -85,11 +85,14 @@ cdr (E (List (_:xs))) = List xs
 cdr (E (List [])) = List []
 cdr _ = error "cdr applied to non list expression!"
 
-cons :: Environment -> Value -> Value -> Expression
--- cons env v1 v2
---   | trace ("cons " ++ show v1 ++ ", " ++ show v2) False = undefined
-cons env (E x) (E (List ys)) = List $ x:ys
-cons env (E x) (E e) = List [x,e]
+cons :: Value -> Value -> Expression
+-- cons v1 v2
+--   | trace ("-> cons v1:" ++ show v1 ++ ", v2:" ++ show v2) False = undefined
+cons (E x) (E (List ys)) = List $ x:ys
+cons (E x) (E e) = List [x,e]
+
+list :: [Expression] -> Expression
+list = List
 
 nil :: Value -> Expression
 nil (E (List [])) = Boolean True
@@ -102,21 +105,35 @@ not _ = Boolean False
 or :: [Value] -> Expression
 or = Boolean . any evalBool
 
+and :: [Value] -> Expression
+and = Boolean . all evalBool
+
 pair :: Value -> Expression
 pair (E (List (x:_))) = Boolean True
 pair _ = Boolean False
 
 compareList :: (Ord a) => (a -> a -> Bool) -> [a] -> Bool
 compareList _ [] = True
-compareList f list = and $ zipWith f list (tail list)
+compareList f list = Prelude.and $ zipWith f list (tail list)
 
 evalExpr :: Environment -> Expression -> Value
--- evalExpr env expr
---   | trace ("evalExpr " ++ show expr) False = undefined
-evalExpr env (Number n)                     = E $ Number n
-evalExpr env (String s)                     = E $ String s
-evalExpr env (Boolean b)                    = E $ Boolean b
-evalExpr env (Quote expression)             = E expression
+evalExpr env expr
+  | trace ("evalExpr " ++ show expr) False = undefined
+evalExpr env (Number n)  = E $ Number n
+evalExpr env (String s)  = E $ String s
+evalExpr env (Boolean b) = E $ Boolean b
+
+-- "quoted data is first rewritten into calls to the list construction
+-- functions before ordinary evaluation proceeds."
+-- http://www.r6rs.org/final/r6rs.pdf
+
+
+-- FIXME!!!
+evalExpr env (Quote (List lst)) = evalExpr env $ List [Symbol "list", List lst]
+-- evalExpr env (Quote (List lst)) = E $ List [Symbol "list", List lst]
+-- evalExpr env (Quote (List (x:xs))) = evalExpr env $ List [Symbol "cons", x, List xs]
+evalExpr env (Quote expression) = E expression
+
 evalExpr env (Lambda formals body)          = C (Lambda formals body, env)
 evalExpr env (Cond (Clause test consequent:cls)) =
   if evalBool $ evalExpr env test then evalExpr env consequent
@@ -147,15 +164,18 @@ evalExpr env (List exprs@(x:xs)) =
         "=" -> E (equal (evalExpr env (head xs))
                    (evalExpr env (head (tail xs))))
         "or" -> E (Wiz.EvalApply.or (map (evalExpr env) xs))
+        "and" -> E (Wiz.EvalApply.and (map (evalExpr env) xs))
         "not" -> E (Wiz.EvalApply.not (evalExpr env (head xs)))
         "null?" -> E (nil (evalExpr env (head xs)))
         "pair?" -> E (pair (evalExpr env (head xs)))
         "car" -> E (car (evalExpr env (head xs)))
         "cdr" -> E (cdr (evalExpr env (head xs)))
-        "cons" -> E (cons env (evalExpr env (head xs)) (evalExpr env (head (tail xs))))
+        "cons" -> E (cons (evalExpr env (head xs))
+                     (evalExpr env (head (tail xs))))
+        "list" -> E $ head xs
         "let" -> evalLet env (head xs) (last xs)
         _ -> apply env (envLookup symbol env) xs
-    _ -> E $ cons env (evalExpr env x) (E (List xs))
+    _ -> E (List exprs) -- cons env (evalExpr env x) (E (List xs))
 
 symbolToString :: Expression -> String
 symbolToString (Symbol s) = s
@@ -176,7 +196,7 @@ evalLet env (List bindings) body = evalExpr env' body
 -- an abstraction of an expression over objects."
 
 apply :: Environment -> Value -> [Expression] -> Value
--- apply env _ _ | trace ("apply in\n" ++ show env) False = undefined
+apply env _ _ | trace ("apply in\n" ++ show env) False = undefined
 
 apply env (C (Lambda (Formals formals) body, env')) arguments = 
   evalExpr env'' body

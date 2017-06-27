@@ -26,7 +26,7 @@ testForm programFile form expectedResults = do
   env <- W.runProgram emptyEnv $ fromMaybe (Program []) prg
   expr <- parseForm form
   results <- W.eval expr env
-  results `shouldBe` (env, expectedResults)
+  snd results `shouldBe` expectedResults
 
 spec = describe "main" $ do
   
@@ -59,6 +59,30 @@ spec = describe "main" $ do
                        Number 2]))
 
   describe "eval" $ do
+
+    it "quoted list" $
+      testForm
+        "init.scm"
+        "(car '(Harry had a heap of apples))"
+        (Just (E $ Symbol "Harry"))
+
+    it "eval atom?" $
+      testForm
+        "init.scm"
+        "(atom? 'a)"
+        (Just (E $ Boolean True))
+
+    it "eval atom? /2" $
+      testForm
+        "init.scm"
+        "(atom? (car '(Harry had a heap of apples)))"
+        (Just (E $ Boolean True))
+
+    it "eval atom? /3" $
+      testForm
+        "init.scm"
+        "(atom? '(a b c))"
+        (Just (E $ Boolean False))
 
     it "eval numeric expressions as integers" $
       testForm
@@ -168,10 +192,12 @@ spec = describe "main" $ do
         (Just (E $ List [Number 2, Number 2, Number 3]))
 
     it "eval set-cdr!" $ do
-      prg <- loadProgram "test/set-cdr.scm"
+      prg <- loadProgram "init.scm"
+      prg' <- loadProgram "test/set-cdr.scm"
       env <- W.runProgram emptyEnv $ fromMaybe (Program []) prg
+      env' <- W.runProgram env $ fromMaybe (Program []) prg'
       expr <- parseForm "list"
-      results <- W.eval expr env
+      results <- W.eval expr env'
       snd results `shouldBe` Just (E $ List [Number 1, Number 20, Number 30])
 
     it "eval set-cdr! (it preserves list length as calculated by length)" $ do

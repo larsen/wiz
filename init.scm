@@ -1,10 +1,25 @@
 ;; collection of functions
 
+(define atom?
+  (lambda (x)
+    (and (not (pair? x)) (not (null? x)))))
+
 (define fact
   (lambda (n)
     (if (= n 0)
         1
         (* n (fact (- n 1))))))
+
+(define foldr
+  (lambda (f base lst)
+    (if (null? lst)
+        base
+        (f (car lst) (foldr f base (cdr lst))))))
+
+(define append
+  (lambda (l m)
+    (if (null? l) m
+        (cons (car l) (append (cdr l) m)))))
 
 (define map
   (lambda (f lst)
@@ -42,4 +57,3 @@
     (if (< (- a b) 0)
         a
         (remainder (- a b) b))))
-    
