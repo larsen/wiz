@@ -21,8 +21,8 @@ runProgram env (Program (x:xs)) = do
 runProgram env (Program []) = return env
 
 eval :: Form -> Environment -> IO (Environment, Maybe Value)
-eval (FExpr (Definition sym expr)) env =
-  return (evalDefinition (E (Definition sym expr)) env, Nothing)
+eval (FExpr (Definition symbol expr)) env =
+  return (evalDefinition (E (Definition symbol expr)) env, Nothing)
 eval (FExpr (SetInstruction symbol expr)) env =
   return (evalSetInstruction symbol expr env, Nothing)
 eval (FExpr (SetCarInstruction symbol expr)) env =
