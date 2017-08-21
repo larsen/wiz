@@ -21,11 +21,10 @@ runProgram env (Program (x:xs)) = do
 runProgram env (Program []) = return env
 
 eval :: Form -> Environment -> IO (Environment, Maybe Value)
-
 eval (FExpr fexpr) env =
   case fexpr of
-    (Definition symbol expr)            -> return (evalDefinition (E (Definition symbol expr)) env, Nothing)
-    (SetInstruction symbol expr)        -> return (evalSetInstruction symbol expr env, Nothing)
+    (Definition        symbol expr)     -> return (evalDefinition (E (Definition symbol expr)) env, Nothing)
+    (SetInstruction    symbol expr)     -> return (evalSetInstruction symbol expr env, Nothing)
     (SetCarInstruction symbol expr)     -> return (evalSetCarInstruction symbol expr env, Nothing)
     (SetCdrInstruction symbol expr)     -> return (evalSetCdrInstruction symbol expr env, Nothing)
     (List [Symbol "load", String file]) -> do
