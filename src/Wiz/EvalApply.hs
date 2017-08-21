@@ -81,7 +81,7 @@ evalExpr env (Boolean b) = E $ Boolean b
 -- http://www.r6rs.org/final/r6rs.pdf
 
 -- FIXME!!!
-evalExpr env (Quote (List lst)) = evalExpr env $ List ([Symbol "list"] ++ lst)
+evalExpr env (Quote (List lst)) = evalExpr env $ List (Symbol "list" : lst)
 -- evalExpr env (Quote (List lst)) = E $ List [Symbol "list", List lst]
 -- evalExpr env (Quote (List (x:xs))) = evalExpr env $ List [Symbol "cons", x, List xs]
 evalExpr env (Quote expression) = E $ Quote expression
