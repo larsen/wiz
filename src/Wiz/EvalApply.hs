@@ -37,6 +37,10 @@ eval (FExpr fexpr) env =
       return (env, Nothing)
     expr                                -> return (env, Just $ evalExpr env expr)  
 
+evalDefinition :: Value -> Environment -> Environment
+evalDefinition (E (Definition symbol expr)) env =
+  changeValue env symbol (evalExpr env expr)
+
 -- TODO refactor
 evalSetInstruction :: String -> Expression -> Environment -> Environment
 evalSetInstruction symbol expr env =
@@ -56,10 +60,6 @@ evalSetCdrInstruction symbol expr env =
       evalExpr env (cons (E x) (evalExpr env expr))
     _ -> error "set-cdr! applied to non-list value"
   where symbolValue = envLookup symbol env
-
-evalDefinition :: Value -> Environment -> Environment
-evalDefinition (E (Definition symbol expr)) env =
-  changeValue env symbol (evalExpr env expr)
 
 evalNum :: Value -> Double
 evalNum (E (Number n)) = n
