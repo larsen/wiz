@@ -3,7 +3,6 @@ module Wiz.Environment (
   envLookup,
   extendEnvironment,
   encloseEnvironment,
-  addEnvironment,
   composeEnvironments,
   changeValue,
   Value( E, C ),
@@ -40,11 +39,9 @@ instance Show Environment where
 emptyEnv :: Environment
 emptyEnv = Environment (fromList []) Nothing
 
-addEnvironment :: Environment -> Environment -> Environment
-addEnvironment e1 e2 = Environment { env = env e1, parent = Just e2 }
-
 composeEnvironments :: [Environment] -> Environment
 composeEnvironments (e:es) = foldr addEnvironment e es
+  where addEnvironment e1 e2 = Environment { env = env e1, parent = Just e2 }
   
 encloseEnvironment :: Environment -> Environment -> Environment
 encloseEnvironment parentEnv childEnv = composeEnvironments [childEnv, parentEnv]
