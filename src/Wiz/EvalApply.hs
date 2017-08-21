@@ -21,23 +21,22 @@ runProgram env (Program (x:xs)) = do
 runProgram env (Program []) = return env
 
 eval :: Form -> Environment -> IO (Environment, Maybe Value)
-eval (FExpr (Definition symbol expr)) env =
-  return (evalDefinition (E (Definition symbol expr)) env, Nothing)
-eval (FExpr (SetInstruction symbol expr)) env =
-  return (evalSetInstruction symbol expr env, Nothing)
-eval (FExpr (SetCarInstruction symbol expr)) env =
-  return (evalSetCarInstruction symbol expr env, Nothing)
-eval (FExpr (SetCdrInstruction symbol expr)) env =
-  return (evalSetCdrInstruction symbol expr env, Nothing)
-eval (FExpr (List [Symbol "load", String file])) env = do
-  prg <- loadProgram file
-  env' <- runProgram env $ fromMaybe (Program []) prg
-  return (env', Nothing)
-eval (FExpr (List [Symbol "display", expr])) env = do
-  result <- return $ evalExpr env expr
-  printf "%s\n" $ show result
-  return (env, Nothing)
-eval (FExpr expr) env = return (env, Just $ evalExpr env expr)
+
+eval (FExpr fexpr) env =
+  case fexpr of
+    (Definition symbol expr)            -> return (evalDefinition (E (Definition symbol expr)) env, Nothing)
+    (SetInstruction symbol expr)        -> return (evalSetInstruction symbol expr env, Nothing)
+    (SetCarInstruction symbol expr)     -> return (evalSetCarInstruction symbol expr env, Nothing)
+    (SetCdrInstruction symbol expr)     -> return (evalSetCdrInstruction symbol expr env, Nothing)
+    (List [Symbol "load", String file]) -> do
+      prg <- loadProgram file
+      env' <- runProgram env $ fromMaybe (Program []) prg
+      return (env', Nothing)
+    (List [Symbol "display", expr])     -> do
+      result <- return $ evalExpr env expr
+      printf "%s\n" $ show result
+      return (env, Nothing)
+    expr                                -> return (env, Just $ evalExpr env expr)  
 
 -- TODO refactor
 evalSetInstruction :: String -> Expression -> Environment -> Environment
