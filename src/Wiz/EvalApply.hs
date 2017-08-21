@@ -84,7 +84,7 @@ evalExpr env (Boolean b) = E $ Boolean b
 evalExpr env (Quote (List lst)) = evalExpr env $ List [Symbol "list", List lst]
 -- evalExpr env (Quote (List lst)) = E $ List [Symbol "list", List lst]
 -- evalExpr env (Quote (List (x:xs))) = evalExpr env $ List [Symbol "cons", x, List xs]
-evalExpr env (Quote expression) = E expression
+evalExpr env (Quote expression) = E $ Quote expression
 
 evalExpr env (Lambda formals body)          = C (Lambda formals body, env)
 evalExpr env (Cond (Clause test consequent:cls)) =

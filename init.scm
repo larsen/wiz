@@ -28,7 +28,7 @@
         (cons (f (car lst))
               (map f (cdr lst))))))
 
-(define else '#t)
+(define else #t)
 
 (define if
   (lambda (test consequent alternate)
