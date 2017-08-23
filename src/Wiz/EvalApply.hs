@@ -51,7 +51,8 @@ evalSetCarInstruction symbol expr env =
   case symbolValue of
     (E (List (x:xs))) -> changeValue env symbol (E $ List (expr:xs))
     _ -> error "set-car! applied to non-list value"
-  where symbolValue = envLookup symbol env
+  where E symbolBinding = envLookup symbol env
+        symbolValue = evalExpr env symbolBinding
 
 evalSetCdrInstruction :: String -> Expression -> Environment -> Environment
 evalSetCdrInstruction symbol expr env =
@@ -59,7 +60,8 @@ evalSetCdrInstruction symbol expr env =
     (E (List (x:xs))) -> changeValue env symbol $
       evalExpr env (cons (E x) (evalExpr env expr))
     _ -> error "set-cdr! applied to non-list value"
-  where symbolValue = envLookup symbol env
+  where E symbolBinding = envLookup symbol env
+        symbolValue = evalExpr env symbolBinding
 
 evalNum :: Value -> Double
 evalNum (E (Number n)) = n
@@ -79,12 +81,11 @@ evalExpr env (Boolean b) = E $ Boolean b
 -- "quoted data is first rewritten into calls to the list construction
 -- functions before ordinary evaluation proceeds."
 -- http://www.r6rs.org/final/r6rs.pdf
-
--- FIXME!!!
-evalExpr env (Quote (List lst)) = evalExpr env $ List (Symbol "list" : lst)
--- evalExpr env (Quote (List lst)) = E $ List [Symbol "list", List lst]
--- evalExpr env (Quote (List (x:xs))) = evalExpr env $ List [Symbol "cons", x, List xs]
-evalExpr env (Quote expression) = E $ Quote expression
+evalExpr env (Quote (List lst)) = evalExpr env expression
+  where expression = rewriteAsCons lst
+        rewriteAsCons [] = List []
+        rewriteAsCons (x:xs) = cons (E $ Quote x) $ E (rewriteAsCons xs)
+evalExpr env (Quote expression) = E expression
 
 evalExpr env (Lambda formals body)          = C (Lambda formals body, env)
 evalExpr env (Cond (Clause test consequent:cls)) =
@@ -124,7 +125,6 @@ evalExpr env (List exprs@(x:xs)) =
         "cdr" -> E (cdr (evalExpr env (head xs)))
         "cons" -> E (cons (evalExpr env (head xs))
                      (evalExpr env (head (tail xs))))
-        "list" -> E $ List xs
         "let" -> evalLet env (head xs) (last xs)
         _ -> apply env (envLookup symbol env) xs
     _ -> E (List exprs) -- cons env (evalExpr env x) (E (List xs))
@@ -156,6 +156,6 @@ apply env (C (Lambda (Formals formals) body, env')) arguments =
                                       env' $ Map.fromList
                                        (zip formals evaledArguments)
                                     , env
-                                    ] 
+                                    ]
         evaledArguments = map (evalExpr env) arguments
 apply _ _ _ = undefined
