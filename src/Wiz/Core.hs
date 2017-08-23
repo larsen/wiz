@@ -29,6 +29,13 @@ cdr (E (List (_:xs))) = List xs
 cdr (E (List [])) = List []
 cdr _ = error "cdr applied to non list expression!"
 
+
+-- (cons ’a ’()) ⇒ (a)
+-- (cons ’(a) ’(b c d)) ⇒ ((a) b c d)
+-- (cons "a" ’(b c)) ⇒ ("a" b c)
+-- (cons ’a 3) ⇒ (a . 3)
+-- (cons ’(a b) ’c) ⇒ ((a b) . c)
+
 cons :: Value -> Value -> Expression
 -- cons v1 v2
 --   | trace ("-> cons v1:" ++ show v1 ++ ", v2:" ++ show v2) False = undefined
