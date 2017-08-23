@@ -28,6 +28,15 @@ testForm programFile form expectedResults = do
   results <- W.eval expr env
   snd results `shouldBe` expectedResults
 
+testForm' programFile form expectedForm = do
+  prg <- loadProgram programFile
+  env <- W.runProgram emptyEnv $ fromMaybe (Program []) prg
+  expr <- parseForm form
+  expectedExpr <- parseForm expectedForm
+  expectedResults <- W.eval expectedExpr env
+  results <- W.eval expr env
+  snd results `shouldBe` snd expectedResults
+
 spec = describe "main" $ do
   
   describe "parse" $ do
@@ -61,113 +70,112 @@ spec = describe "main" $ do
   describe "eval" $ do
 
     it "quoted list" $
-      testForm
+      testForm'
         "init.scm"
         "(car '(Harry had a heap of apples))"
-        (Just (E $ Symbol "Harry"))
+        "'Harry"
 
     it "eval atom?" $
-      testForm
+      testForm'
         "init.scm"
         "(atom? 'a)"
-        (Just (E $ Boolean True))
+        "#t"
 
     it "eval atom? /2" $
-      testForm
+      testForm'
         "init.scm"
         "(atom? (car '(Harry had a heap of apples)))"
-        (Just (E $ Boolean True))
+        "#t"
 
     it "eval atom? /3" $
-      testForm
+      testForm'
         "init.scm"
         "(atom? '(a b c))"
-        (Just (E $ Boolean False))
+        "#f"
 
     it "eval numeric expressions as integers" $
-      testForm
+      testForm'
         "init.scm"
         "1"
-        (Just (E $ Number 1))
+        "1"
 
     it "eval simple arithmetic operations" $
-      testForm
+      testForm'
         "init.scm"
         "(+ 2 2)"
-        (Just (E $ Number 4))
-    
+        "4"
 
     it "eval simple comparison operator" $
-      testForm
+      testForm'
         "init.scm"
         "(< 1 2)"
-        (Just (E $ Boolean True))
+        "#t"
 
     it "eval simple comparison operator /2" $
-      testForm
+      testForm'
         "init.scm"
         "(> 1 2)"
-        (Just (E $ Boolean False))
+        "#f"
 
     it "eval simple comparison operator /3" $
-      testForm
+      testForm'
         "init.scm"
         "(> 3 2 5)"
-        (Just (E $ Boolean False))
+        "#f"
 
     it "eval simple comparison operator /3" $
-      testForm
+      testForm'
         "init.scm"
         "(> 3 3 5)"
-        (Just (E $ Boolean False))
+        "#f"
 
     it "eval function calls /square" $
-      testForm
+      testForm'
         "test/square.scm"
         "(square 10)"
-        (Just (E $ Number 100))
+        "100"
 
     it "eval recursive function calls /fact" $
-      testForm
+      testForm'
         "init.scm"
         "(fact 10)"
-        (Just (E $ Number 3628800))
+        "3628800"
 
     it "eval recursive function calls /map" $
-      testForm
+      testForm'
         "init.scm"
         "(map fact '(1 2 3))"
-        (Just (E $ List [Number 1, Number 2, Number 6]))
+        "(1 2 6)"
 
     it "eval another recursive function calls /length" $
-      testForm
+      testForm'
         "init.scm"
         "(length '(1 2 3))"
-        (Just (E $ Number 3))
+        "3"
 
     it "eval (let) form" $
-      testForm
+      testForm'
         "init.scm"
         "(let ((a 10) (b 20)) a)"
-        (Just (E $ Number 10))
+        "10"
 
     it "eval (let) form /2" $
-      testForm
+      testForm'
         "init.scm"
         "(let ((a 10) (b 20)) (+ a b))"
-        (Just (E $ Number 30))
+        "30"
 
     it "eval closure form" $
-      testForm
+      testForm'
         "init.scm"
         "(add1 10)"
-        (Just (E $ Number 11))
+        "11"
 
     it "procedure returning closure" $
-       testForm
+       testForm'
         "test/closure.scm"
         "(m 10)"
-        (Just (E $ Number 20))
+        "20"
 
     it "count change example" $ do
       prg <- loadProgram "init.scm"
@@ -180,16 +188,16 @@ spec = describe "main" $ do
 
   describe "set! instructions" $ do
     it "eval set!" $
-      testForm
+      testForm'
         "test/set.scm"
         "a"
-        (Just (E $ Number 20))
+        "20"
 
     it "eval set-car!" $
-      testForm
+      testForm'
         "test/set-car.scm"
         "list"
-        (Just (E $ List [Number 2, Number 2, Number 3]))
+        "(2 2 3)"
 
     it "eval set-cdr!" $ do
       prg <- loadProgram "init.scm"
