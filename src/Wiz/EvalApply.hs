@@ -129,9 +129,6 @@ evalExpr env (List exprs@(x:xs)) =
         _ -> apply env (envLookup symbol env) xs
     _ -> E (List exprs) -- cons env (evalExpr env x) (E (List xs))
 
-symbolToString :: Expression -> String
-symbolToString (Symbol s) = s
-
 listToList (List l) = l
 
 evalLet env (List bindings) body = evalExpr env' body
@@ -141,6 +138,7 @@ evalLet env (List bindings) body = evalExpr env' body
        (zip bindingsNames (map E bindingsExpressions)))
     bindingsNames = map ((symbolToString . head) . listToList) bindings
     bindingsExpressions = map (last . listToList) bindings
+    symbolToString (Symbol s) = s
 
 -- Apply
 
