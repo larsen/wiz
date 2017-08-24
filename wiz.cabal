@@ -17,6 +17,7 @@ executable wiz
   main-is:             Main.hs
   other-modules:       Wiz.Parser
                      , Wiz.Types
+                     , Wiz.Core
                      , Wiz.Environment
                      , Wiz.EvalApply
   build-depends:       base >=4.7 && <=4.9
@@ -43,6 +44,7 @@ test-suite main-suite
                      , test
   other-modules:       Wiz.Parser
                      , Wiz.Types
+                     , Wiz.Core
                      , Wiz.Environment
                      , Wiz.EvalApply
                      , Wiz.EvalApplySpec
