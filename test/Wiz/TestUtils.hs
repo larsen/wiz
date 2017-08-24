@@ -15,12 +15,14 @@ import Text.ParserCombinators.Parsec.Error (
   errorMessages,
   messageEq )
 
+parseForm :: String -> IO Form
 parseForm str = do
   let res = parse pForm "(source)" str
   case res of
     Left err -> error "Something gone wrong!"
     Right f  -> return f
 
+testForm :: [String] -> String -> String -> IO ()
 testForm programFiles form expectedForm = do
   env <- foldM (\e pf ->
                   loadProgram pf >>= (W.runProgram e . fromMaybe (Program [])))
