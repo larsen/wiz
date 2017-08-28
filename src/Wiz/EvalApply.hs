@@ -116,6 +116,8 @@ evalExpr env (List exprs@(x:xs)) =
         -- Primitive procedures
         "=" -> E (equal (evalExpr env (head xs))
                    (evalExpr env (head (tail xs))))
+        "eq?" -> E (equal (evalExpr env (head xs))
+                   (evalExpr env (head (tail xs))))
         "or" -> E (Wiz.Core.or (map (evalExpr env) xs))
         "and" -> E (Wiz.Core.and (map (evalExpr env) xs))
         "not" -> E (Wiz.Core.not (evalExpr env (head xs)))
