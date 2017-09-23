@@ -22,6 +22,7 @@ equal x y | x == y = Boolean True
 car :: Value -> Expression
 car (E (List (x:_))) = x
 car (E (List [])) = List []
+car (E (Quote (List (x:_)))) = x
 car _ = error "car applied to non list expression!"
 
 cdr :: Value -> Expression

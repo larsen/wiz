@@ -1,3 +1,4 @@
+
 module Wiz.Types (
     Formals( Formals ),
     Expression(
@@ -20,7 +21,7 @@ module Wiz.Types (
   ) where
 
 import qualified Data.List as L
-import qualified Data.Map as Map
+import Data.Map()
 
 data Formals = Formals [String]
   deriving (Eq, Show, Ord)
@@ -51,6 +52,9 @@ instance Show Expression where
   show (Clause t c) = "(" ++ show t ++ " " ++ show c ++ ")"
   show (List exprs) = "(" ++ L.unwords (map show exprs) ++ ")"
   show (Operator c) = show c
+  show (SetInstruction s e) = show s ++ show e
+  show (SetCarInstruction s e) = show s ++ show e
+  show (SetCdrInstruction s e) = show s ++ show e
   show (Definition sym expr) =
     "(define " ++ sym ++ " (" ++ show expr ++ "))"
   show (Lambda (Formals formals) expr) = "#PROCEDURE (λ (" ++ show expr ++ "))"

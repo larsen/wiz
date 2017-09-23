@@ -65,6 +65,7 @@ evalSetCdrInstruction symbol expr env =
 
 evalNum :: Value -> Double
 evalNum (E (Number n)) = n
+evalNum (E (Quote (Number n))) = n -- HACK
 evalNum e = error $ "evalNum " ++ show e
 
 compareList :: (Ord a) => (a -> a -> Bool) -> [a] -> Bool
@@ -73,7 +74,7 @@ compareList f list = Prelude.and $ zipWith f list (tail list)
 
 evalExpr :: Environment -> Expression -> Value
 -- evalExpr env expr
---   | trace ("evalExpr " ++ show expr) False = undefined
+--   | traceStack ("evalExpr " ++ show expr) False = undefined
 evalExpr env (Number n)  = E $ Number n
 evalExpr env (String s)  = E $ String s
 evalExpr env (Boolean b) = E $ Boolean b
@@ -85,7 +86,7 @@ evalExpr env (Quote (List lst)) = evalExpr env expression
   where expression = rewriteAsCons lst
         rewriteAsCons [] = List []
         rewriteAsCons (x:xs) = cons (E $ Quote x) $ E (rewriteAsCons xs)
-evalExpr env (Quote expression) = E expression
+evalExpr env (Quote expression) = E (Quote expression)
 
 evalExpr env (Lambda formals body)          = C (Lambda formals body, env)
 evalExpr env (Cond (Clause test consequent:cls)) =
@@ -129,7 +130,11 @@ evalExpr env (List exprs@(x:xs)) =
                      (evalExpr env (head (tail xs))))
         "let" -> evalLet env (head xs) (last xs)
         _ -> apply env (envLookup symbol env) xs
-    _ -> E (List exprs) -- cons env (evalExpr env x) (E (List xs))
+        
+    -- HACK can I remove quoting here, just befure returning the result?
+    _ -> E (List (map (\e -> case e of
+                               Quote (Number e') -> Number e'
+                               _        -> e) exprs)) -- cons env (evalExpr env x) (E (List xs))
 
 evalLet env (List bindings) body = evalExpr env' body
   where 
@@ -156,5 +161,7 @@ apply env (C (Lambda (Formals formals) body, env')) arguments =
                                        (zip formals evaledArguments)
                                     , env
                                     ]
-        evaledArguments = map (evalExpr env) arguments
+        evaledArguments = map evalExpr' arguments
+        evalExpr' (Quote q) = E (Quote q)
+        evalExpr' e = evalExpr env e
 apply _ _ _ = undefined

@@ -54,12 +54,12 @@ envLookup :: String -> Environment -> Value
 -- envLookup symbol env
 --   | trace ("envlookup " ++ show symbol ++ " in\n" ++ show env) False = undefined
 
-envLookup symbol (Environment env parent) =
-  fromMaybe
-    (case parent of
-      Just p -> envLookup symbol p
-      Nothing -> error ("Unbound symbol " ++ show symbol))
-    res
+envLookup symbol (Environment env parent) = fromMaybe
+  ( case parent of
+    Just p  -> envLookup symbol p
+    Nothing -> error ("Unbound symbol " ++ show symbol)
+  )
+  res
   where res = Data.Map.lookup symbol env
 
 changeValue :: Environment -> String -> Value -> Environment

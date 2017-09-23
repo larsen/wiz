@@ -5,11 +5,10 @@ module Wiz.Parser (
   ) where
 
 import Wiz.Types
-import Wiz.Environment
-import Text.Parsec.Char (space, spaces)
+-- import Wiz.Environment
+import Text.Parsec.Char (spaces)
 import Text.Parsec.String (Parser)
-import Text.Parsec.Token (parens)
-import Text.Parsec (ParseError, anyChar, endOfLine, parse, char, digit, string, noneOf, try, sepBy, (<|>))
+import Text.Parsec (anyChar, endOfLine, parse, char, digit, string, noneOf, try, sepBy, (<|>))
 import Text.Parsec.Combinator (choice, many1, manyTill)
 import Control.Applicative (many)
 import Control.Monad (void)
@@ -99,9 +98,8 @@ pExpr = do
 
 pFormals :: Parser Formals
 pFormals = betweenParens $ do
-    formals <- many pIdentifier
-    return $ Formals formals
-  where formals = []
+  formals <- many pIdentifier
+  return $ Formals formals
 
 pClause :: Parser Expression
 pClause = betweenParens $ do
