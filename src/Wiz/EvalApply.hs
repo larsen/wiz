@@ -134,7 +134,8 @@ evalExpr env (List exprs@(x:xs)) =
     -- HACK can I remove quoting here, just befure returning the result?
     _ -> E (List (map (\e -> case e of
                                Quote (Number e') -> Number e'
-                               _        -> e) exprs)) -- cons env (evalExpr env x) (E (List xs))
+                               Quote (List e') -> List e'
+                               _        -> e) exprs))
 
 evalLet env (List bindings) body = evalExpr env' body
   where 
