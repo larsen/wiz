@@ -65,7 +65,6 @@ evalSetCdrInstruction symbol expr env =
 
 evalNum :: Value -> Double
 evalNum (E (Number n)) = n
-evalNum (E (Quote (Number n))) = n -- HACK
 evalNum e = error $ "evalNum " ++ show e
 
 compareList :: (Ord a) => (a -> a -> Bool) -> [a] -> Bool
